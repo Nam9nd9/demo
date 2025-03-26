@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:mobile/delegates/customer_search_delegate.dart';
-import 'package:mobile/screen/account/login_screen.dart';
+
 import 'package:mobile/service/api_service.dart';
 import 'package:mobile/widget/advancedDropdownButton.dart';
 import 'package:mobile/widget/cart_icon.dart';
 import 'package:mobile/widget/create_custumer.dart';
+import 'package:mobile/widget/customer_search.dart';
 
 class CustomerScreen extends StatefulWidget {
   const CustomerScreen({Key? key}) : super(key: key);
@@ -75,10 +74,12 @@ class _CustomerScreenState extends State<CustomerScreen> {
                     IconButton(
                       icon: const Icon(Icons.search),
                       onPressed: () {
-                        showSearch(
-                          context: context,
-                          delegate: CustomerSearchDelegate(customers),
-                        );
+                        Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CustomerSearchPage(customers: customers),
+                        ),
+                      );
                       },
                     ),
                     CartIcon(),
@@ -114,9 +115,13 @@ class _CustomerScreenState extends State<CustomerScreen> {
               padding: const EdgeInsets.all(8.0),
               child: customers.isEmpty
                   ? const Center(child: CircularProgressIndicator())
-                  : ListView.builder(
+                  : ListView.separated(
                       padding: EdgeInsets.zero,
                       itemCount: customers.length,
+                      separatorBuilder: (context, index) => Divider(
+                        height: 0.5,
+                        color: const Color(0xFF555E5C).withOpacity(0.3),
+                      ),
                       itemBuilder: (context, index) {
                         final customer = customers[index];
                         if (selectedGroup != "Tất cả" && customer['group_name'] != selectedGroup) {

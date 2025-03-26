@@ -25,7 +25,6 @@ class CustomSearchBar extends StatelessWidget {
             child: TextField(
               controller: controller,
               decoration: const InputDecoration(
-                hintText: "Tìm kiếm...",
                 border: InputBorder.none,
                 isDense: true,
               ),

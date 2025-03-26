@@ -5,51 +5,49 @@ import 'dart:convert';
 class ApiService {
   static const String baseUrl = "https://api.mediax.com.vn";
 
-  // Lưu accessToken vào SharedPreferences
-  static Future<void> _saveAccessToken(String accessToken) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString("accessToken", accessToken);
-  }
+static Future<void> _saveUserData(Map<String, dynamic> data) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setString("id", data["id"]);
+  await prefs.setString("username", data["username"]);
+  await prefs.setString("accessToken", data["access_token"]);
+}
 
-  // Lấy accessToken từ SharedPreferences
   static Future<String?> getAccessToken() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString("accessToken");
   }
 
-  // API Đăng nhập (SignIn)
-  static Future<String?> signin(String username, String password) async {
-    const String apiUrl = "$baseUrl/users/signin";
-    final Map<String, String> body = {
-      "username": username,
-      "password": password,
-    };
+static Future<String?> signin(String username, String password) async {
+  const String apiUrl = "$baseUrl/users/signin";
+  final Map<String, String> body = {
+    "username": username,
+    "password": password,
+  };
 
-    try {
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(body),
-      );
+  try {
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(body),
+    );
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        String accessToken = data['access_token'];
-        print(data);
-        await _saveAccessToken(accessToken);
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(response.body);
+      print(data);
+      await _saveUserData(data);
 
-        return null; // Thành công
-      } else {
-        final Map<String, dynamic> errorData = json.decode(response.body);
-        return errorData['detail']; // Trả về lỗi từ API
-      }
-    } catch (e) {
-      print("Lỗi API signin: $e");
-      return "Lỗi kết nối với máy chủ!";
+      return null; 
+    } else {
+      final Map<String, dynamic> errorData = json.decode(response.body);
+      return errorData['detail']; 
     }
+  } catch (e) {
+    print("Lỗi API signin: $e");
+    return "Lỗi kết nối với máy chủ!";
   }
+}
 
-  // API Đăng xuất (SignOut)
+
   static Future<void> signout() async {
     const String apiUrl = "$baseUrl/users/signout";
 
@@ -96,7 +94,7 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        final utf8DecodedBody = utf8.decode(response.bodyBytes); // Sửa lỗi mã hóa
+        final utf8DecodedBody = utf8.decode(response.bodyBytes); 
         return jsonDecode(utf8DecodedBody);
       } else {
         print("❌ Lỗi API: ${response.statusCode} - ${response.body}");
@@ -189,7 +187,6 @@ static Future<Map<String, dynamic>?> getCustomers(int skip, int limit) async {
 
     if (response.statusCode == 200) {
       final utf8DecodedBody = utf8.decode(response.bodyBytes);
-      print("📥 Dữ liệu API nhận được: $utf8DecodedBody"); // Fix lỗi thiếu dấu `;`
       return jsonDecode(utf8DecodedBody);
     } else {
       print("❌ Lỗi API: ${response.statusCode} - ${response.body}");
@@ -200,4 +197,99 @@ static Future<Map<String, dynamic>?> getCustomers(int skip, int limit) async {
     return null;
   }
 }
+// provinces 
+ static Future<List<Map<String, dynamic>>?> getProvinces() async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/deliveries/ghn/provinces'));
+
+      if (response.statusCode == 200) {
+        final String utf8DecodedBody = utf8.decode(response.bodyBytes);
+        final Map<String, dynamic> jsonData = jsonDecode(utf8DecodedBody);
+
+        if (jsonData['success'] == true && jsonData['data'] is List) {
+          return List<Map<String, dynamic>>.from(jsonData['data']);
+        } else {
+          print("⚠️ Dữ liệu API Tỉnh không hợp lệ: $jsonData");
+        }
+      } else {
+        print("❌ Lỗi API: ${response.statusCode} - ${utf8.decode(response.bodyBytes)}");
+      }
+    } catch (e) {
+      print("⚠️ Lỗi khi gọi API: $e");
+    }
+    return null;
+  }
+
+  static Future<List<Map<String, dynamic>>?> getDistricts(String provinceId) async {
+    final String apiUrl = "$baseUrl/deliveries/ghn/districts/$provinceId";
+    String? accessToken = await getAccessToken();
+
+    if (accessToken == null) {
+      print("⚠️ Không có accessToken, cần đăng nhập!");
+      return null;
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $accessToken",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final String utf8DecodedBody = utf8.decode(response.bodyBytes);
+        final Map<String, dynamic> data = jsonDecode(utf8DecodedBody);
+
+        if (data.containsKey('data') && data['data'] is List) {
+          return List<Map<String, dynamic>>.from(data['data']);
+        } else {
+          print("⚠️ Dữ liệu API Huyện không hợp lệ: $data");
+        }
+      } else {
+        print("❌ Lỗi API: ${response.statusCode} - ${utf8.decode(response.bodyBytes)}");
+      }
+    } catch (e) {
+      print("⚠️ Lỗi kết nối API: $e");
+    }
+    return null;
+  }
+
+  static Future<List<Map<String, dynamic>>?> getWards(String districtId) async {
+    final String apiUrl = "$baseUrl/deliveries/ghn/wards/$districtId";
+    String? accessToken = await getAccessToken();
+
+    if (accessToken == null) {
+      print("⚠️ Không có accessToken, cần đăng nhập!");
+      return null;
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $accessToken",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final String utf8DecodedBody = utf8.decode(response.bodyBytes);
+        final Map<String, dynamic> data = jsonDecode(utf8DecodedBody);
+
+        if (data.containsKey('data') && data['data'] is List) {
+          return List<Map<String, dynamic>>.from(data['data']);
+        } else {
+          print("⚠️ Dữ liệu API Phường không hợp lệ: $data");
+        }
+      } else {
+        print("❌ Lỗi API: ${response.statusCode} - ${utf8.decode(response.bodyBytes)}");
+      }
+    } catch (e) {
+      print("⚠️ Lỗi kết nối API: $e");
+    }
+    return null;
+  }
+
 }

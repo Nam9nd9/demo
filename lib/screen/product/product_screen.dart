@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:mobile/screen/product/detail_screen.dart';
 import 'package:mobile/service/api_service.dart';
 import 'package:mobile/widget/advancedDropdownButton.dart';
-import 'package:mobile/delegates/product_search_delegate.dart';
 import 'package:mobile/widget/cart_icon.dart';
 
 
@@ -97,16 +96,25 @@ class _ProductScreenState extends State<ProductScreen> {
                 ),
                 Row(
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.search),
-                      onPressed: () async {
-                        List<Map<String, dynamic>> products = await ApiService.searchProduct(""); // Gọi API với query rỗng để lấy danh sách sản phẩm ban đầu.
-                        showSearch(
-                          context: context,
-                          delegate: ProductSearchDelegate(),
-                        );
-                      },
-                    ),
+                      IconButton(
+                        icon: const Icon(Icons.search),
+                        onPressed: () async {
+                          try {
+                            List<Map<String, dynamic>> products = await ApiService.searchProduct("");
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ProductScreen(),
+                              ),
+                            );
+                          } catch (error) {
+                            print("⚠️ Lỗi khi tải dữ liệu: $error");
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Không thể tải dữ liệu, thử lại sau!")),
+                            );
+                          }
+                        },
+                      ),
                     CartIcon(),
                   ],
                 ),

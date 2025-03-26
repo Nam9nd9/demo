@@ -5,6 +5,7 @@ import 'package:mobile/screen/account/login_screen.dart';
 import 'package:mobile/service/api_service.dart';
 import 'package:mobile/widget/advancedDropdownButton.dart';
 import 'package:mobile/widget/cart_icon.dart';
+import 'package:mobile/widget/create_custumer.dart';
 
 class CustomerScreen extends StatefulWidget {
   const CustomerScreen({Key? key}) : super(key: key);
@@ -33,13 +34,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
     }
   }
 
-  void _handleLogout() async {
-    await ApiService.signout();
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginScreen()),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,11 +54,22 @@ class _CustomerScreenState extends State<CustomerScreen> {
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 Row(
-                  children: [
+                  children: [                           
                     IconButton(
                       icon: const Icon(Icons.add),
                       onPressed: () {
-                        _handleLogout();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => Scaffold(
+                                  body: Column(                                 
+                                    children: [
+                                      SizedBox(height: statusBarHeight),
+                                      _buildHeader(context),
+                                      const Expanded(child: CreateCustomerBody()),
+                                    ],
+                                  ),
+                          )),
+                        );
                       },
                     ),
                     IconButton(
@@ -131,4 +136,42 @@ class _CustomerScreenState extends State<CustomerScreen> {
       ),
     );
   }
+Widget _buildHeader(BuildContext context) {
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    color: Colors.white,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.arrow_back, size: 24, color: Colors.black),
+              onPressed: () => Navigator.pop(context),
+            ),
+            TextButton(
+              onPressed: () {
+              },
+              style: TextButton.styleFrom(
+                backgroundColor: const Color(0xFF338BFF), 
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                child: Text("Tạo khách hàng", style: TextStyle(color: Colors.white, fontSize: 16)),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8), 
+        const Text(
+          "Tạo Khách Hàng",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+      ],
+    ),
+  );
+}
+
 }

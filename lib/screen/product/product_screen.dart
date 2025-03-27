@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/screen/account/login_screen.dart';
 import 'package:mobile/screen/product/detail_screen.dart';
 import 'package:mobile/service/api_service.dart';
 import 'package:mobile/widget/advancedDropdownButton.dart';
 import 'package:mobile/widget/cart_icon.dart';
-
+import 'package:http/http.dart' as http;
 
 class ProductScreen extends StatefulWidget {
   const ProductScreen({super.key});
@@ -75,7 +76,6 @@ class _ProductScreenState extends State<ProductScreen> {
     _scrollController.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     final double statusBarHeight = MediaQuery.of(context).padding.top;

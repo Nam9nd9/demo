@@ -167,6 +167,8 @@ static Future<Map<String, dynamic>?> getProductDetail(String id) async {
     }
     }
 
+//customer
+
 static Future<Map<String, dynamic>?> getCustomers(int skip, int limit) async {
   final String apiUrl = "$baseUrl/customers/customers?skip=$skip&limit=$limit";
   String? accessToken = await getAccessToken();
@@ -197,7 +199,37 @@ static Future<Map<String, dynamic>?> getCustomers(int skip, int limit) async {
     return null;
   }
 }
-// provinces 
+static Future<Map<String, dynamic>?> getCustomerById(String customerId) async {
+  final String apiUrl = "$baseUrl/customers/customers/${customerId}";
+  String? accessToken = await getAccessToken();
+  if (accessToken == null) {
+    print("⚠️ Không có accessToken, cần đăng nhập!");
+    return null;
+  }
+
+  try {
+    final response = await http.get(
+      Uri.parse(apiUrl),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final utf8DecodedBody = utf8.decode(response.bodyBytes);
+      return jsonDecode(utf8DecodedBody);
+    } else {
+      print("❌ API Error: ${response.statusCode} - ${utf8.decode(response.bodyBytes)}");
+      return null;
+    }
+  } catch (e) {
+    print("⚠️ Lỗi kết nối API: $e");
+    return null;
+  }
+}
+
+
  static Future<List<Map<String, dynamic>>?> getProvinces() async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/deliveries/ghn/provinces'));

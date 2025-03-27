@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/screen/customer/detail_screen.dart';
 
 import 'package:mobile/service/api_service.dart';
 import 'package:mobile/widget/advancedDropdownButton.dart';
@@ -131,7 +132,14 @@ class _CustomerScreenState extends State<CustomerScreen> {
                           title: Text(customer['full_name'] ?? "Không có tên"),
                           subtitle: Text("SĐT: ${customer['phone'] ?? 'Không có'}"),
                           trailing: const Icon(Icons.arrow_forward_ios, size: 18),
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CustomerDetailScreen(customerId: customer['id'].toString()),
+                              ),
+                            );
+                          },
                         );
                       },
                     ),

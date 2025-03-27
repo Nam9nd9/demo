@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/screen/customer/detail_screen.dart';
 
 class CustomerSearchPage extends StatefulWidget {
   final List<Map<String, dynamic>> customers;
@@ -64,7 +65,14 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
           title: Text(customer['full_name'] ?? "Không có tên"),
           subtitle: Text("SĐT: ${customer['phone'] ?? 'Không có'}"),
           trailing: const Icon(Icons.arrow_forward_ios, size: 18),
-          onTap: () {},
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CustomerDetailScreen(customerId: customer['id'].toString()),
+              ),
+            );
+          },
         );
       },
     );

@@ -5,6 +5,7 @@ import 'package:mobile/service/api_service.dart';
 import 'package:mobile/widget/advancedDropdownButton.dart';
 import 'package:mobile/widget/cart_icon.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobile/widget/product_search.dart';
 
 class ProductScreen extends StatefulWidget {
   const ProductScreen({super.key});
@@ -15,7 +16,7 @@ class ProductScreen extends StatefulWidget {
 
 class _ProductScreenState extends State<ProductScreen> {
   String _selectedStatus = 'Trạng thái';
-  final List<String> _statuses = ['Trạng thái', 'Còn hàng', 'Hết hàng'];
+  final List<String> _statuses = ['Trạng thái', 'Đang giao dịch', 'Ngưng giao dịch'];
   List<Map<String, dynamic>> _products = [];
   
   int currentPage = 0;
@@ -104,7 +105,7 @@ class _ProductScreenState extends State<ProductScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => ProductScreen(),
+                                builder: (context) => ProductSearchPage(),
                               ),
                             );
                           } catch (error) {

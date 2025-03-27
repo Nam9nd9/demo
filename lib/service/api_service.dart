@@ -228,6 +228,37 @@ static Future<Map<String, dynamic>?> getCustomerById(String customerId) async {
     return null;
   }
 }
+static Future<bool> updateCustomer(String customerId, Map<String, dynamic> updatedData) async {
+  final String apiUrl = "$baseUrl/customers/customers/$customerId";
+  String? accessToken = await getAccessToken();
+
+  if (accessToken == null) {
+    print("⚠️ Không có accessToken, cần đăng nhập!");
+    return false;
+  }
+
+  try {
+    final response = await http.put(
+      Uri.parse(apiUrl),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+      body: jsonEncode(updatedData),
+    );
+
+    if (response.statusCode == 200) {
+      print("✅ Cập nhật khách hàng thành công!");
+      return true;
+    } else {
+      print("❌ Lỗi API: ${response.statusCode} - ${response.body}");
+      return false;
+    }
+  } catch (e) {
+    print("⚠️ Lỗi kết nối API: $e");
+    return false;
+  }
+}
 
 
  static Future<List<Map<String, dynamic>>?> getProvinces() async {

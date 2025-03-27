@@ -10,7 +10,7 @@ class CreateCustomerBody extends StatefulWidget {
   _CreateCustomerBodyState createState() => _CreateCustomerBodyState();
 }
 String _customerGroup = 'Đại lý';
-final List<String> _customerGroups = ['Đại lý', 'Khách VIP', 'Khách buôn', 'Khách lẻ'];
+final List<String> _customerGroups = ['Đại lý', 'Khách VIP', 'Khách buôn-CTV', 'Khách lẻ','Khách Trắng'];
 
 class _CreateCustomerBodyState extends State<CreateCustomerBody> {
   final _formKey = GlobalKey<FormState>();
@@ -166,7 +166,7 @@ class _CreateCustomerBodyState extends State<CreateCustomerBody> {
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Row(
             children: [
-              SizedBox(width: 120, child: Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w400))),
+              SizedBox(width: 160, child: Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w400))),
               Expanded(
                 child: TextFormField(
                   controller: controller,
@@ -188,7 +188,11 @@ class _CreateCustomerBodyState extends State<CreateCustomerBody> {
                         }
                       : null,
                   decoration: InputDecoration(
-                    hintText: "Bắt buộc",
+                    hintText: label == "Email"
+                      ? "Không bắt buộc"
+                      : (isDate
+                          ? "dd/mm/yy"
+                          : (label == "Địa chỉ" ? "Yêu cầu" : "Bắt buộc")),
                     hintStyle: const TextStyle(color: Colors.grey),
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
@@ -213,29 +217,30 @@ Widget _buildDropdownField(String label, List<String> items, String selectedValu
         child: Row(
           children: [
             SizedBox(
-              width: 120,
+              width: 165,
               child: Text(
                 label,
                 style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
               ),
             ),
-            Expanded(
-              child: DropdownButtonFormField<String>(
-                value: selectedValue,
-                decoration: InputDecoration(
-                  enabledBorder:  InputBorder.none,
-                  focusedBorder:  InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
-                ),
-                items: items.map((String item) {
-                  return DropdownMenuItem<String>(
-                    value: item,
-                    child: Text(item),
-                  );
-                }).toList(),
-                onChanged: onChanged,
-              ),
-            ),
+Expanded(
+  child: DropdownButtonFormField<String>(
+    value: selectedValue,
+    decoration: InputDecoration(
+      enabledBorder: InputBorder.none,
+      focusedBorder: InputBorder.none,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+    ),
+    items: items.map((String item) {
+      return DropdownMenuItem<String>(
+        value: item,
+        child: Text(item),
+      );
+    }).toList(),
+    onChanged: onChanged,
+    dropdownColor: Colors.white,  // Đặt nền màu trắng cho dropdown
+  ),
+)
           ],
         ),
       ),
@@ -252,7 +257,7 @@ Widget _buildSearchableField(String label, TextEditingController controller, Lis
         child: Row(
           children: [
             SizedBox(
-              width: 120,
+              width: 160,
               child: Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w400)),
             ),
             Expanded(
@@ -267,22 +272,31 @@ Widget _buildSearchableField(String label, TextEditingController controller, Lis
                 selectedItem: controller.text.isNotEmpty ? controller.text : null,
                 dropdownDecoratorProps: DropDownDecoratorProps(
                   dropdownSearchDecoration: InputDecoration(
-                    hintText: "Nhập để tìm kiếm...",
-                    enabledBorder:  InputBorder.none,
-                    focusedBorder:  InputBorder.none,
+                    hintText: "Yêu cầu",
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
                   ),
                 ),
                 popupProps: PopupProps.menu(
                   showSearchBox: true,
+                  containerBuilder: (context, popupWidget) {
+                    return Container(
+                      color: Colors.white, // Đặt nền màu trắng cho menu
+                      child: popupWidget,
+                    );
+                  },
                   searchFieldProps: TextFieldProps(
                     decoration: InputDecoration(
                       hintText: "Tìm kiếm...",
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
                     ),
                   ),
                 ),
               ),
-            ),
+            )
+
           ],
         ),
       ),

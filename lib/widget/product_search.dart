@@ -46,7 +46,7 @@ class _ProductSearchPageState extends State<ProductSearchPage> {
 
 Widget _buildSearchField() {
   return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 8),
+    padding: const EdgeInsets.symmetric(horizontal: 0),
     child: TextField(
       autofocus: true,
       decoration: InputDecoration(

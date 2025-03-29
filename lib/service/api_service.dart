@@ -125,6 +125,7 @@ static Future<Map<String, dynamic>?> getProductDetail(String id) async {
 
     if (response.statusCode == 200) {
       final utf8DecodedBody = utf8.decode(response.bodyBytes);
+      print(utf8DecodedBody);
       return jsonDecode(utf8DecodedBody);
     } else {
       print("❌ Lỗi API: ${response.statusCode} - ${response.body}");
@@ -258,8 +259,37 @@ static Future<bool> updateCustomer(String customerId, Map<String, dynamic> updat
     print("⚠️ Lỗi kết nối API: $e");
     return false;
   }
-}
+} 
+//invoice
+  static Future createInvoice(Map<String, dynamic> payload) async {
+    final url = Uri.parse('$baseUrl/invoices/invoices');
+    String? accessToken = await getAccessToken();
 
+    if (accessToken == null) {
+      print("⚠️ Không có accessToken, cần đăng nhập!");
+      return false;
+    }
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $accessToken",
+        },
+        body: jsonEncode(payload),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return jsonDecode(response.body);
+      } else {
+        final Map<String, dynamic> errorData = jsonDecode(response.body);
+        String errorMessage = errorData['detail'] ?? "Lỗi không xác định";
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      throw Exception("Lỗi khi gọi API: $e");
+    }
+  }
 
  static Future<List<Map<String, dynamic>>?> getProvinces() async {
     try {

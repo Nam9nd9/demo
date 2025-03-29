@@ -223,24 +223,24 @@ Widget _buildDropdownField(String label, List<String> items, String selectedValu
                 style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
               ),
             ),
-Expanded(
-  child: DropdownButtonFormField<String>(
-    value: selectedValue,
-    decoration: InputDecoration(
-      enabledBorder: InputBorder.none,
-      focusedBorder: InputBorder.none,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
-    ),
-    items: items.map((String item) {
-      return DropdownMenuItem<String>(
-        value: item,
-        child: Text(item),
-      );
-    }).toList(),
-    onChanged: onChanged,
-    dropdownColor: Colors.white,  // Đặt nền màu trắng cho dropdown
-  ),
-)
+            Expanded(
+              child: DropdownButtonFormField<String>(
+                value: selectedValue,
+                decoration: InputDecoration(
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+                ),
+                items: items.map((String item) {
+                  return DropdownMenuItem<String>(
+                    value: item,
+                    child: Text(item),
+                  );
+                }).toList(),
+                onChanged: onChanged,
+                dropdownColor: Colors.white, 
+              ),
+            )
           ],
         ),
       ),
@@ -281,7 +281,7 @@ Widget _buildSearchableField(String label, TextEditingController controller, Lis
                   showSearchBox: true,
                   containerBuilder: (context, popupWidget) {
                     return Container(
-                      color: Colors.white, // Đặt nền màu trắng cho menu
+                      color: Colors.white, 
                       child: popupWidget,
                     );
                   },
@@ -296,7 +296,6 @@ Widget _buildSearchableField(String label, TextEditingController controller, Lis
                 ),
               ),
             )
-
           ],
         ),
       ),

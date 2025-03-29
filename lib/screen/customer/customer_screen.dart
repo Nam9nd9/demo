@@ -17,8 +17,12 @@ class CustomerScreen extends StatefulWidget {
 class _CustomerScreenState extends State<CustomerScreen> {
   List<Map<String, dynamic>> customers = [];
   String selectedGroup = "Tất cả";
-  final List<String> groupList = ["Tất cả", "Khách Lẻ", "VIP", "Thành Viên"];
-
+  final Map<String, String> groupList = {
+  "1": "Khách lẻ",
+  "2": "Khách VIP",
+  "3": "Khách buôn - CTV",
+  "4": "Thành Viên",
+};
   @override
   void initState() {
     super.initState();
@@ -26,7 +30,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
   }
 
   Future<void> fetchCustomers() async {
-    final response = await ApiService.getCustomers(0, 20);
+    final response = await ApiService.getCustomers(0, 50);
     if (response != null && response['customers'] != null) {
       setState(() {
         customers = List<Map<String, dynamic>>.from(response['customers']);
@@ -129,18 +133,26 @@ class _CustomerScreenState extends State<CustomerScreen> {
                           return const SizedBox.shrink();
                         }
                         return ListTile(
-                          title: Text(customer['full_name'] ?? "Không có tên"),
-                          subtitle: Text("SĐT: ${customer['phone'] ?? 'Không có'}"),
-                          trailing: const Icon(Icons.arrow_forward_ios, size: 18),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => CustomerDetailScreen(customerId: customer['id'].toString()),
+                        title: Text(customer['full_name'] ?? "Không có tên"),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("SĐT: ${customer['phone'] ?? 'Không có'}"),
+                            Text("Công nợ: ${customer['debt'] ?? '0'} · Điểm tích lũy: ${customer['loyalty_points'] ?? '0'}"),
+                          ],
+                        ),
+                        trailing: const Icon(Icons.arrow_forward_ios, size: 18),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CustomerDetailScreen(
+                                customerId: customer['id'].toString(),
                               ),
-                            );
-                          },
-                        );
+                            ),
+                          );
+                        },
+                      );
                       },
                     ),
             ),
@@ -167,13 +179,13 @@ Widget _buildHeader(BuildContext context) {
               onPressed: () {
               },
               style: TextButton.styleFrom(
-                backgroundColor: const Color(0xFF338BFF), 
+                backgroundColor: const Color(0xFF338BFF),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                minimumSize: Size(0, 0),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap
               ),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                child: Text("Tạo khách hàng", style: TextStyle(color: Colors.white, fontSize: 16)),
-              ),
+              child: const Text("Tạo khách hàng", style: TextStyle(color: Colors.white, fontSize: 16)),
             ),
           ],
         ),

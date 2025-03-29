@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-
 class AdvancedDropdownButton extends StatefulWidget {
-  final List<String> items;
+  final Map<String, String> items; // Thay đổi kiểu dữ liệu
   final String hint;
   final Function(String)? onChanged;
+  final bool customStyle;
 
   const AdvancedDropdownButton({
     required this.items,
     required this.hint,
     this.onChanged,
+    this.customStyle = false,
     Key? key,
   }) : super(key: key);
 
@@ -26,23 +27,31 @@ class _AdvancedDropdownButtonState extends State<AdvancedDropdownButton> {
       height: 28,
       padding: const EdgeInsets.fromLTRB(10, 4, 8, 4),
       decoration: BoxDecoration(
-        color: const Color(0xFFE9ECF2),
+        color: widget.customStyle ? const Color(0xFFE9F2FF) : Colors.white,
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.grey.shade400),
+        border: Border.all(color: widget.customStyle ?  Color(0x26338BFF) : Colors.grey.shade400),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           hint: Text(
             widget.hint,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: Colors.black54),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: widget.customStyle ? const Color(0xFF338BFF) : Colors.black54,
+            ),
           ),
           value: selectedValue,
-          items: widget.items.map((e) {
+          items: widget.items.entries.map((entry) {
             return DropdownMenuItem<String>(
-              value: e,
+              value: entry.key,
               child: Text(
-                e,
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: Colors.black54),
+                entry.value, 
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                  color: widget.customStyle ? const Color(0xFF338BFF) : Colors.black54,
+                ),
               ),
             );
           }).toList(),
@@ -54,7 +63,7 @@ class _AdvancedDropdownButtonState extends State<AdvancedDropdownButton> {
               widget.onChanged!(value);
             }
           },
-          icon: const Icon(Icons.arrow_drop_down, color: Colors.black54, size: 18),
+          icon: Icon(Icons.arrow_drop_down, color: widget.customStyle ? const Color(0xFF338BFF) : Colors.black54),
           dropdownColor: Colors.white,
           elevation: 4,
           isExpanded: true,

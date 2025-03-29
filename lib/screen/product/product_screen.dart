@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/screen/account/login_screen.dart';
 import 'package:mobile/screen/product/detail_screen.dart';
 import 'package:mobile/service/api_service.dart';
 import 'package:mobile/widget/advancedDropdownButton.dart';
@@ -16,7 +15,7 @@ class ProductScreen extends StatefulWidget {
 
 class _ProductScreenState extends State<ProductScreen> {
   String _selectedStatus = 'Trạng thái';
-  final List<String> _statuses = ['Trạng thái', 'Đang giao dịch', 'Ngưng giao dịch'];
+
   List<Map<String, dynamic>> _products = [];
   
   int currentPage = 0;
@@ -125,7 +124,10 @@ class _ProductScreenState extends State<ProductScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: AdvancedDropdownButton(
-              items: _statuses,
+              items: {
+                "cotheban": "Đang giao dịch",
+                "ngungban": "Ngưng giao dịch"
+              },
               hint: _selectedStatus,
               onChanged: (value) {
                 setState(() {

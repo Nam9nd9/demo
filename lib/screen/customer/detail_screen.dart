@@ -275,6 +275,9 @@ Future<void> _saveCustomerDetails() async {
             style: TextButton.styleFrom(
               backgroundColor: const Color(0xFF338BFF),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              minimumSize: Size(0, 0),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap
             ),
             child: const Padding(
               padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),

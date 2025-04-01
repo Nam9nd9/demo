@@ -65,7 +65,6 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
         _provinces = data;
       });
     }
-    print(data);
   }
 
   Future<void> _fetchDistricts(String provinceId) async {
@@ -97,6 +96,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
     });
 
     final customerData = await ApiService.getCustomerById(widget.customerId);
+    print(customerData);
     if (customerData != null) {
       setState(() {
         _nameController.text = customerData["full_name"] ?? "";

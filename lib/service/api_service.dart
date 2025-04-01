@@ -284,7 +284,8 @@ static Future<bool> updateCustomer(String customerId, Map<String, dynamic> updat
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return jsonDecode(response.body);
+        final String utf8DecodedBody = utf8.decode(response.bodyBytes);
+        return jsonDecode(utf8DecodedBody);
       } else {
         final Map<String, dynamic> errorData = jsonDecode(response.body);
         String errorMessage = errorData['detail'] ?? "Lỗi không xác định";

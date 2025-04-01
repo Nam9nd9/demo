@@ -5,7 +5,7 @@ class Invoice {
   final String name;
   final List<Item> items;
   final double discount;
-  final String discountType; // "%" hoặc "value"
+  final String discountType; 
   final double customerPaid;
   final double customerDeposit;
   final String depositMethod;
@@ -58,7 +58,7 @@ class Invoice {
       'customerPaid': customerPaid,
       'customerDeposit': customerDeposit,
       'depositMethod': depositMethod,
-      'customer_id': customer_id,
+      'customer': customer_id,
       'branch': branch,
       'isDelivery': isDelivery,
       'orderSource': orderSource,

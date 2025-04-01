@@ -63,10 +63,19 @@ class InvoiceProvider with ChangeNotifier {
 
     notifyListeners();
   }
+   void updateDepositMethod(String method) {
+    _depositMethod = method;
+    notifyListeners();
+  }
+
+  void updateDeposit(double deposit) {
+    _deposit = deposit;
+    notifyListeners();
+  }
 
   Map<String, dynamic> toJson() {
     return {
-      "customer_id": _customer,  // Ensure this is correctly serialized
+      "customer": _customer, 
       "user_id": _userId,
       "branch": _selectedWarehouse,
       "discount": _discount,

@@ -80,7 +80,7 @@ class CartProvider extends ChangeNotifier {
     if (_discountType == "%") {
       return total * (1 - _cartDiscount / 100);
     } else {
-      return (total - _cartDiscount).clamp(0, double.infinity); // Không để giá trị âm
+      return (total - _cartDiscount).clamp(0, double.infinity);
     }
   }
 

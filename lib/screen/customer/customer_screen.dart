@@ -138,7 +138,28 @@ class _CustomerScreenState extends State<CustomerScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text("SĐT: ${customer['phone'] ?? 'Không có'}"),
-                            Text("Công nợ: ${customer['debt'] ?? '0'} · Điểm tích lũy: ${customer['loyalty_points'] ?? '0'}"),
+                            Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: "Công nợ: ",
+                                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
+                                  ),
+                                  TextSpan(
+                                    text: "${customer['debt'] ?? '0'} ",
+                                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.black),
+                                  ),
+                                  TextSpan(
+                                    text: "· Điểm tích lũy: ",
+                                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
+                                  ),
+                                  TextSpan(
+                                    text: "${customer['loyalty_points'] ?? '0'}",
+                                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.black),
+                                  ),
+                                ],
+                              ),
+                            )
                           ],
                         ),
                         trailing: const Icon(Icons.arrow_forward_ios, size: 18),

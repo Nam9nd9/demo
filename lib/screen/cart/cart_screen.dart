@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile/model/cart_item.dart';
 import 'package:mobile/providers/cart_provider.dart';
 import 'package:mobile/providers/invoice_provider.dart';
+import 'package:mobile/screen/cart/payment_screen.dart';
 import 'package:mobile/screen/customer/search_select.dart';
 import 'package:mobile/screen/home_screen.dart';
 import 'package:mobile/service/api_service.dart';
@@ -67,8 +68,8 @@ void loadUserId() async {
     "branch": selectedWarehouse,
     "discount": _discount,
     "discount_type": _discountType,
-    "deposit": 0,
-    "deposit_method": "cash",
+    // "deposit": 0,
+    // "deposit_method": "cash",
     "is_delivery": true,
     "expected_delivery":"",
     "order_source": "facebook",
@@ -80,12 +81,6 @@ void loadUserId() async {
    invoiceProvider.updateInvoice(customerData);
      print("${invoiceProvider.toJson()}");
 
-   try {
-    final response = await ApiService.createInvoice(invoiceProvider.toJson());
-    print("Phản hồi API: $response");
-  } catch (e) {
-    print("Lỗi khi gọi API: $e");
-  }
   }
     void clearSelectedCustomer() {
     setState(() {
@@ -470,7 +465,11 @@ void loadUserId() async {
                 ),
                 SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () {_saveCustomerDetails();},
+                  onPressed: () {_saveCustomerDetails();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => PaymentScreen()),
+                  );},
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     padding: EdgeInsets.symmetric(vertical: 12),

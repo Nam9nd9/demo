@@ -216,7 +216,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 void _showQuantityModal(BuildContext context) {
   showModalBottomSheet(
     context: context,
-    isScrollControlled: true, // Cho phép modal mở rộng toàn màn hình nếu cần
+    isScrollControlled: true,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
     ),
@@ -225,135 +225,292 @@ void _showQuantityModal(BuildContext context) {
         builder: (BuildContext context, StateSetter setState) {
           double price = double.tryParse(productDetail!["price_retail"].toString()) ?? 0;
           double totalPrice = price * quantity;
-          int stock = productDetail?["${selectedWarehouse}_stock"] ?? 0;
-
-          return SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom), // Đẩy modal lên khi bàn phím mở
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom, // <-- Đẩy nội dung lên khi mở bàn phím
+            ),
+            child: SingleChildScrollView(
               child: Container(
-                color: Colors.white,
-                padding: EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)), // Bo góc trên
+                ),
+                padding: const EdgeInsets.all(16.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 96,
-                          height: 96,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            image: productDetail!["images"] != null && productDetail!["images"].isNotEmpty
-                                ? DecorationImage(
-                                    image: NetworkImage("https://api.mediax.com.vn${productDetail!["images"][0]["url"]}"),
-                                    fit: BoxFit.cover,
-                                  )
+                  Container(
+                  color: Colors.white,
+                  padding: EdgeInsets.all(16.0), 
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 96,
+                            height: 96,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              image: productDetail!["images"] != null && productDetail!["images"].isNotEmpty
+                                  ? DecorationImage(
+                                      image: NetworkImage("https://api.mediax.com.vn${productDetail!["images"][0]["url"]}"),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : null,
+                              color: Colors.grey[200], 
+                            ),
+                            child: productDetail!["images"] == null || productDetail!["images"].isEmpty
+                                ? Center(child: Icon(Icons.image_not_supported, color: Colors.grey))
                                 : null,
-                            color: Colors.grey[200],
+                            // color: Colors.grey[200],
                           ),
-                          child: productDetail!["images"] == null || productDetail!["images"].isEmpty
-                              ? Center(child: Icon(Icons.image_not_supported, color: Colors.grey))
-                              : null,
-                        ),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Tổng tiền: ${totalPrice.toStringAsFixed(0)}đ",
-                                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                "Tồn kho: $stock",
-                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
-                              ),  
-                              SizedBox(height: 16),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.grey),
-                                      borderRadius: BorderRadius.circular(4),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "${totalPrice.toStringAsFixed(0)}",
+                                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+                                ),
+                                Row(
+                                  children: [
+                                    Text(
+                                      "Có thể bán: ${productDetail?["${selectedWarehouse}_stock"] ?? 0}", // Lấy giá trị tồn kho từ productDetail
+                                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
                                     ),
-                                    child: Row(
-                                      children: [
-                                        IconButton(
-                                          icon: Icon(Icons.remove, size: 16),
-                                          onPressed: () {
-                                            if (quantity > 1) {
-                                              setState(() {
-                                                updateQuantity(quantity - 1);
-                                              });
-                                            }
-                                          },
-                                        ),
-                                        Container(
-                                          width: 55,
-                                          child: TextField(
-                                            controller: _quantityController,
-                                            textAlign: TextAlign.center,
-                                            keyboardType: TextInputType.number,
-                                            decoration: InputDecoration(
-                                              border: InputBorder.none,
+                                    // SizedBox(width: 12),
+                                    // Expanded(
+                                    //   child: DropdownButtonFormField<String>(
+                                    //     value: selectedWarehouse,
+                                    //     decoration: InputDecoration(
+                                    //       filled: true,
+                                    //       fillColor: Color.fromARGB(51, 41, 126, 238),
+                                    //       border: OutlineInputBorder(
+                                    //         borderRadius: BorderRadius.circular(6),
+                                    //         borderSide: BorderSide.none,
+                                    //       ),
+                                    //       contentPadding: EdgeInsets.fromLTRB(10, 6, 8, 6),
+                                    //       isDense: true,
+                                    //     ),
+                                    //     icon: Icon(Icons.arrow_drop_down, color: Color(0xFF338BFF)),
+                                    //     iconSize: 12,
+                                    //     onChanged: (String? newValue) {
+                                    //       setState(() {
+                                    //         selectedWarehouse = newValue!;
+                                    //       });
+                                    //     },
+                                    //     items: [
+                                    //       DropdownMenuItem(
+                                    //         value: "thonhuom",
+                                    //         child: Text("Kho thợ Nhuộm", style: TextStyle(fontSize: 12, color: Color(0xFF338BFF))),
+                                    //       ),
+                                    //       DropdownMenuItem(
+                                    //         value: "terra",
+                                    //         child: Text("Kho Tera", style: TextStyle(fontSize: 12, color: Color(0xFF338BFF))),
+                                    //       ),
+                                    //     ],
+                                    //   ),
+                                    // ),
+                                  ],
+                                ),
+                                SizedBox(height: 9),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.grey.shade400),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      height: 30,
+                                      width: 120,
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: InkWell(
+                                              onTap: () {
+                                                if (quantity > 1) {
+                                                  setState(() {
+                                                    updateQuantity(quantity - 1);
+                                                  });
+                                                }
+                                              },
+                                              child: Center(
+                                                child: Icon(Icons.remove, size: 18, color: Colors.grey),
+                                              ),
                                             ),
-                                            onChanged: (value) {
-                                              int? newQuantity = int.tryParse(value);
-                                              if (newQuantity != null && newQuantity > 0 && newQuantity <= stock) {
-                                                setState(() {
-                                                  updateQuantity(newQuantity);
-                                                });
-                                              }
-                                            },
                                           ),
-                                        ),
-                                        IconButton(
-                                          icon: Icon(Icons.add, size: 16),
-                                          onPressed: () {
-                                            if (quantity < stock) {
-                                              setState(() {
-                                                updateQuantity(quantity + 1);
-                                              });
-                                            }
-                                          },
-                                        ),
-                                      ],
+                                          Container(
+                                            width: 1,
+                                            color: Colors.grey.shade300,
+                                          ),
+                                          Expanded(
+                                            child: TextField(
+                                              controller: _quantityController,
+                                              textAlign: TextAlign.center,
+                                              keyboardType: TextInputType.number,
+                                              decoration: InputDecoration(
+                                                border: InputBorder.none,
+                                                enabledBorder: InputBorder.none,
+                                                focusedBorder: InputBorder.none,
+                                                isCollapsed: true, 
+                                                contentPadding: EdgeInsets.zero,
+                                              ),
+                                              onChanged: (value) {
+                                                final newQuantity = int.tryParse(value);
+                                                if (newQuantity != null && newQuantity > 0) {
+                                                  setState(() {
+                                                    updateQuantity(newQuantity);
+                                                  });
+                                                }
+                                              },
+                                            ),
+                                          ),
+                                          Container(
+                                            width: 1,
+                                            color: Colors.grey.shade300,
+                                          ),
+                                          Expanded(
+                                            child: InkWell(
+                                              onTap: () {
+                                                setState(() {
+                                                  updateQuantity(quantity + 1);
+                                                });
+                                              },
+                                              child: Center(
+                                                child: Icon(Icons.add, size: 18, color: Colors.grey),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                  ],
+                                )
+                                // Row(
+                                //   mainAxisAlignment: MainAxisAlignment.start,
+                                //   children: [
+                                //     Row(
+                                //       mainAxisAlignment: MainAxisAlignment.center,
+                                //       children: [
+                                //         Container(
+                                //           decoration: BoxDecoration(
+                                //             border: Border.all(color: Colors.grey),
+                                //             borderRadius: BorderRadius.circular(4),
+                                //           ),
+                                //           child: Row(
+                                //             children: [
+                                //               IconButton(
+                                //                 icon: Icon(Icons.remove, size: 16),
+                                //                 onPressed: () {
+                                //                   if (quantity > 1) {
+                                //                     setState(() {
+                                //                       updateQuantity(quantity -1);
+                                //                     });
+                                //                   }
+                                //                 },
+                                //               ),
+                                //               Container(
+                                //                 width: 55,                                               
+                                //                 child: TextField(
+                                //                   controller: _quantityController,
+                                //                   textAlign: TextAlign.center,
+                                //                   keyboardType: TextInputType.number,
+                                //                   decoration: InputDecoration(
+                                //                     border: InputBorder.none,
+                                //                   ),
+                                //                   onChanged: (value) {
+                                //                     int? newQuantity = int.tryParse(value);
+                                //                     if (newQuantity != null) {
+                                //                       setState(() {
+                                //                         updateQuantity(newQuantity);
+                                //                       });
+                                //                     }
+                                //                   },
+                                //                 ),
+                                //               ),
+                                //               IconButton(
+                                //                 icon: Icon(Icons.add, size: 16),
+                                //                 onPressed: () {
+                                //                   setState(() {
+                                //                     updateQuantity(quantity +1);
+                                //                   });
+                                //                 },
+                                //               ),
+                                //             ],
+                                //           ),
+                                //         ),
+                                //       ],
+                                //     ),
+                                //   ],
+                                // ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 15),
+                    //   ElevatedButton(
+                    //     onPressed: () {
+                    //       _addToOrder(context);
+                    //       Navigator.pop(context);
+                    //     },
+                    //     style: ElevatedButton.styleFrom(
+                    //       backgroundColor: Color(0xFF338BFF),
+                    //       foregroundColor: Colors.white,
+                    //       padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                    //       shape: RoundedRectangleBorder(
+                    //         borderRadius: BorderRadius.circular(8),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
+                    // SizedBox(height: 15),
+                    // ElevatedButton(
+                    //   onPressed: () {
+                    //     _addToOrder(context);
+                    //     Navigator.pop(context);
+                    //   },
+                    //   style: ElevatedButton.styleFrom(
+                    //     backgroundColor: Color(0xFF338BFF),
+                    //     foregroundColor: Colors.white,
+                    //     padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                    //     shape: RoundedRectangleBorder(
+                    //       borderRadius: BorderRadius.circular(8),
+                    //     ),
+                    //   ),
+                    //   SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity, // Button full chiều rộng
+                      child: ElevatedButton(
+                        onPressed: () {
+                          _addToOrder(context);
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF338BFF),
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(vertical: 12), // Tăng chiều cao
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                      ],
-                    ),
-                    SizedBox(height: 15),
-                    ElevatedButton(
-                      onPressed: () {
-                        _addToOrder(context);
-                        Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF338BFF),
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                        child: Text(
+                          "Thêm vào đơn hàng",
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                       ),
-                      child: Text(
-                        "Thêm vào đơn hàng",
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
-                      ),
                     ),
-                    SizedBox(height: 16),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ),
+          ),
+        ),
           );
         },
       );

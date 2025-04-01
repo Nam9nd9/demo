@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mobile/providers/invoice_provider.dart';
 import 'package:provider/provider.dart';
 import 'providers/cart_provider.dart';
 import 'screen/splash_screen.dart';
@@ -20,11 +21,13 @@ void main() async {
   ]);
 
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => CartProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => InvoiceProvider()),
+        ChangeNotifierProvider(create: (context) => CartProvider()),
+      ],
       child: MyApp(),
-    ),
-  );
+    ),);
 }
 
 class MyApp extends StatelessWidget {

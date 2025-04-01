@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/model/cart_item.dart';
 import 'package:mobile/providers/cart_provider.dart';
+import 'package:mobile/providers/invoice_provider.dart';
 import 'package:mobile/screen/customer/search_select.dart';
+import 'package:mobile/screen/home_screen.dart';
 import 'package:mobile/service/api_service.dart';
 import 'package:mobile/widget/create_custumer.dart';
 import 'package:provider/provider.dart';
@@ -20,8 +22,9 @@ class _CartScreenState extends State<CartScreen> {
   String selectedWarehouse = "Thợ Nhuộm";
   List<String> warehouseList = ['Thợ Nhuộm', 'Terra'];
   Map<String, dynamic>? selectedCustomer;
-  double _discount = 0; 
-  String userId = "NV1";
+  double _discount = 0;
+  String _discountType = "%"; 
+  String userId = "NV123";
 void loadUserId() async {
   String? id = await getUserId();
   if (id != null) {
@@ -37,6 +40,7 @@ void loadUserId() async {
     _fetchProductDetails();
     loadUserId();
     selectedCustomer = widget.selectedCustomer;
+    _saveCustomerDetails();
   }
 
   Future<void> _fetchProductDetails() async {
@@ -53,20 +57,35 @@ void loadUserId() async {
     }
   }
   Future<void> _saveCustomerDetails() async {
+  final cartProvider = Provider.of<CartProvider>(context, listen: false);
+  final invoiceProvider = Provider.of<InvoiceProvider>(context, listen: false);
+  final List<Item> cartItems = cartProvider.cartItems;
+   
   final Map<String, dynamic> customerData = {
-    "customer_id": selectedCustomer["id"] ,
-    "user_id": userId,
+    "customer": selectedCustomer ,
+    "user_id": "NV2",
     "branch": selectedWarehouse,
     "discount": _discount,
-    "discount_type": "%",
+    "discount_type": _discountType,
     "deposit": 0,
     "deposit_method": "cash",
-    "is_delivery": false,
-    "order_source": null,
+    "is_delivery": true,
+    "expected_delivery":"",
+    "order_source": "facebook",
     "note": "",
-    "items": CartProvider.item,
-    "service_items": []
+    "items": cartItems.map((item) => item.toJson()).toList(),
+    "service_items": [],
+    "extraCost": 0
   };
+   invoiceProvider.updateInvoice(customerData);
+     print("${invoiceProvider.toJson()}");
+
+   try {
+    final response = await ApiService.createInvoice(invoiceProvider.toJson());
+    print("Phản hồi API: $response");
+  } catch (e) {
+    print("Lỗi khi gọi API: $e");
+  }
   }
     void clearSelectedCustomer() {
     setState(() {
@@ -93,7 +112,12 @@ void loadUserId() async {
             children: [
               IconButton(
                 icon: Icon(Icons.arrow_back, size: 24, color: Colors.black),
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => HomeScreen(),
+                              ),
+                            )
               ),
               Container(
                 decoration: BoxDecoration(
@@ -294,53 +318,67 @@ void loadUserId() async {
                                               )
                                             : SizedBox(height: 16, width: 60, child: LinearProgressIndicator()),
                                         Container(
-                                          height: 26,
                                           decoration: BoxDecoration(
-                                            border: Border.all(color: Colors.grey),
-                                            borderRadius: BorderRadius.circular(1),
+                                            border: Border.all(color: Colors.grey.shade400),
+                                            borderRadius: BorderRadius.circular(6),
                                           ),
+                                          height: 30,
+                                          width: 120,
                                           child: Row(
-                                            mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              IconButton(
-                                                icon: Icon(Icons.remove, color: Colors.black, size: 16),
-                                                constraints: BoxConstraints(),
-                                                padding: EdgeInsets.zero,
-                                                onPressed: () {
-                                                  if (item.quantity > 1) {
-                                                    cartProvider.updateQuantity(item.productId, item.quantity - 1);
-                                                  }
-                                                },
-                                              ),
-                                              Container(
-                                                width: 1,
-                                                height: 26,
-                                                color: Colors.grey,
-                                              ),
-                                              Container(
-                                                width: 36,
-                                                alignment: Alignment.center,
-                                                child: Text(
-                                                  item.quantity.toString(),
-                                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                              Expanded(
+                                                child: InkWell(
+                                                  onTap: () {
+                                                    if (item.quantity > 1) {
+                                                      cartProvider.updateQuantity(item.productId, item.quantity - 1);
+                                                    }
+                                                  },
+                                                  child: Center(
+                                                    child: Icon(Icons.remove, size: 18, color: Colors.grey),
+                                                  ),
                                                 ),
                                               ),
                                               Container(
                                                 width: 1,
-                                                height: 26,
-                                                color: Colors.grey,
+                                                color: Colors.grey.shade300,
                                               ),
-                                              IconButton(
-                                                icon: Icon(Icons.add, color: Colors.black, size: 16),
-                                                constraints: BoxConstraints(),
-                                                padding: EdgeInsets.zero,
-                                                onPressed: () {
-                                                  cartProvider.updateQuantity(item.productId, item.quantity + 1);
-                                                },
+                                              Expanded(
+                                                child: TextField(
+                                                  controller: TextEditingController(text: item.quantity.toString()),
+                                                  textAlign: TextAlign.center,
+                                                  keyboardType: TextInputType.number,
+                                                  decoration: InputDecoration(
+                                                    border: InputBorder.none,
+                                                    enabledBorder: InputBorder.none,
+                                                    focusedBorder: InputBorder.none,
+                                                    isCollapsed: true,
+                                                    contentPadding: EdgeInsets.zero,
+                                                  ),
+                                                  onChanged: (value) {
+                                                    final newQuantity = int.tryParse(value);
+                                                    if (newQuantity != null && newQuantity > 0) {
+                                                      cartProvider.updateQuantity(item.productId, newQuantity);
+                                                    }
+                                                  },
+                                                ),
+                                              ),
+                                              Container(
+                                                width: 1,
+                                                color: Colors.grey.shade300,
+                                              ),
+                                              Expanded(
+                                                child: InkWell(
+                                                  onTap: () {
+                                                    cartProvider.updateQuantity(item.productId, item.quantity + 1);
+                                                  },
+                                                  child: Center(
+                                                    child: Icon(Icons.add, size: 18, color: Colors.grey),
+                                                  ),
+                                                ),
                                               ),
                                             ],
                                           ),
-                                        )
+                                        ),
                                       ],
                                     ),
                                   ],
@@ -361,35 +399,64 @@ void loadUserId() async {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "Chiết khấu tổng đơn:",
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400, color: Color(0xB23C3C43)),
+                    Row(
+                      children: [
+                        Text(
+                          "Chiết khấu tổng đơn ",
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400, color: Color(0xB23C3C43)),
+                        ),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.white,
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value: _discountType,
+                               icon: SizedBox.shrink(),
+                              items: ["%", "value"].map((String type) {
+                                return DropdownMenuItem<String>(
+                                  value: type,
+                                  child: Text("(${type})", style: TextStyle(fontSize: 14,color: Color(0xFF338BFF))),
+                                );
+                              }).toList(),
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  _discountType = newValue!;
+                                });
+                                cartProvider.updateDiscount(_discount, _discountType);
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  Container(
-                    width: 70,
-                    height: 28,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Color(0x593C3C43), width: 1), 
-                      borderRadius: BorderRadius.circular(8), // Bo góc 4px
-                    ),
-                    child: TextField(
-                      keyboardType: TextInputType.number,
-                      textAlign: TextAlign.center, 
-                      style: TextStyle(fontSize: 14),
-                      decoration: InputDecoration(
-                        hintText: "     0",
-                        suffixText: "%",
-                        border: InputBorder.none, 
-                        contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    Container(
+                      width: 70,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Color(0x593C3C43), width: 1),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      onChanged: (value) {
+                      child: TextField(
+                        keyboardType: TextInputType.number,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 14),
+                        decoration: InputDecoration(
+                          hintText: "0",
+                          suffixText: _discountType == "%" ? "%" : "",
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        ),
+                        onChanged: (value) {
                           setState(() {
-                          _discount = double.tryParse(value) ?? 0;
-                        });
-                        cartProvider.updateDiscount(_discount);
-                      },
+                            _discount = double.tryParse(value) ?? 0;
+                          });
+                          cartProvider.updateDiscount(_discount, _discountType);
+                        },
+                      ),
                     ),
-                  )
                   ],
                 ),
 
@@ -397,7 +464,7 @@ void loadUserId() async {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Tổng đơn hàng (${cartProvider.totalQuantity().toString()} sản phẩm ):", style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400)),
+                    Text("Tổng đơn hàng (${cartProvider.totalQuantity().toString()} sản phẩm ) :", style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400)),
                     Text("${cartProvider.totalPrice()}", style: TextStyle(fontSize: 15, color: Colors.black, fontWeight: FontWeight.w700)),
                   ],
                 ),
@@ -436,6 +503,7 @@ void loadUserId() async {
             ),
             TextButton(
               onPressed: () {
+                _saveCustomerDetails();
               },
               style: TextButton.styleFrom(
                 backgroundColor: const Color(0xFF338BFF),

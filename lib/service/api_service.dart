@@ -16,6 +16,10 @@ static Future<void> _saveUserData(Map<String, dynamic> data) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString("accessToken");
   }
+    static Future<String?> getUserId() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString("id");
+  }
 
 static Future<String?> signin(String username, String password) async {
   const String apiUrl = "$baseUrl/users/signin";

@@ -22,30 +22,27 @@ class _PaymentScreenState extends State<PaymentScreen> {
     double deposit = double.tryParse(depositController.text) ?? 0;
     invoiceProvider.updateDepositMethod('cash');
     invoiceProvider.updateDeposit(deposit);
+    print(invoiceProvider.toJson());
 
-    // try {
-    //   final response = await ApiService.createInvoice(invoiceProvider.toJson());
-    //   if (response != null && response['id'] != null) {
-    //     String invoiceId = response['id'].toString();
-    //     print("thông tin đơn hàng id : ${invoiceId}");
-    //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Tạo hóa đơn thành công!")));
+    try {
+      final response = await ApiService.createInvoice(invoiceProvider.toJson());
+      if (response != null && response['id'] != null) {
+        String invoiceId = response['id'].toString();
+        print("thông tin đơn hàng id : ${invoiceId}");
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Tạo hóa đơn thành công!")));
 
-    //     await Future.delayed(Duration(seconds: 2));
-    //     Navigator.push(
-    //       context,
-    //       MaterialPageRoute(
-    //         builder: (context) => InvoiceInfoScreen(invoiceId: invoiceId),
-    //       ),
-    //     );
-    //   }
-    // } catch (e) {
-    //   print("Lỗi khi gọi API: $e");
-    //   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Lỗi khi tạo hóa đơn")));
-    // }
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => InvoiceInfoScreen(invoiceId: "DH49")),
-    );
+        await Future.delayed(Duration(seconds: 2));
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => InvoiceInfoScreen(invoiceId: invoiceId)),
+        );
+      }
+    } catch (e) {
+      print("Lỗi khi gọi API: $e");
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Lỗi khi tạo hóa đơn")));
+    }
   }
 
   @override

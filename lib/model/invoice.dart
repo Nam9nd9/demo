@@ -5,7 +5,7 @@ class Invoice {
   final String name;
   final List<Item> items;
   final double discount;
-  final String discountType; 
+  final String discountType;
   final double customerPaid;
   final double customerDeposit;
   final String depositMethod;
@@ -33,9 +33,7 @@ class Invoice {
     return Invoice(
       id: json['id'],
       name: json['name'],
-      items: (json['items'] as List)
-          .map((item) => Item.fromJson(item))
-          .toList(),
+      items: (json['items'] as List).map((item) => Item.fromJson(item)).toList(),
       discount: json['discount'].toDouble(),
       discountType: json['discountType'],
       customerPaid: json['customerPaid'].toDouble(),
@@ -54,14 +52,14 @@ class Invoice {
       'name': name,
       'items': items.map((item) => item.toJson()).toList(),
       'discount': discount,
-      'discountType': discountType,
-      'customerPaid': customerPaid,
-      'customerDeposit': customerDeposit,
-      'depositMethod': depositMethod,
+      'discount_type': discountType,
+      'customer_paid': customerPaid,
+      'customer_deposit': customerDeposit,
+      'deposit_method': depositMethod,
       'customer_id': customer_id,
       'branch': branch,
-      'isDelivery': isDelivery,
-      'orderSource': orderSource,
+      'is_delivery': isDelivery,
+      'order_source': orderSource,
     };
   }
 }

@@ -3,7 +3,7 @@ import 'package:mobile/model/cart_item.dart';
 
 class InvoiceProvider with ChangeNotifier {
   // Map<String, dynamic>? _customer;
-   String _customer = "";
+  String _customer = "";
   String _selectedWarehouse = "Thợ Nhuộm";
   double _discount = 0;
   String _userId = "NV1";
@@ -42,9 +42,7 @@ class InvoiceProvider with ChangeNotifier {
     _expectedDelivery = data["expected_delivery"] ?? "";
     _orderSource = data["order_source"] ?? "";
     _extraCost = (data["extraCost"] ?? 0).toDouble();
-    _items = (data["items"] as List)
-        .map((item) => Item.fromJson(item))
-        .toList();
+    _items = (data["items"] as List).map((item) => Item.fromJson(item)).toList();
 
     notifyListeners();
   }
@@ -64,7 +62,8 @@ class InvoiceProvider with ChangeNotifier {
 
     notifyListeners();
   }
-   void updateDepositMethod(String method) {
+
+  void updateDepositMethod(String method) {
     _depositMethod = method;
     notifyListeners();
   }
@@ -76,16 +75,16 @@ class InvoiceProvider with ChangeNotifier {
 
   Map<String, dynamic> toJson() {
     return {
-      "customer_id": _customer, 
+      "customer_id": _customer,
       "user_id": _userId,
       "branch": _selectedWarehouse,
       "discount": _discount,
-      "discountType": _discountType,
+      "discount_type": _discountType,
       "deposit": _deposit,
-      "depositMethod": _depositMethod,
-      "isDelivery": _isDelivery,
+      "deposit_method": _depositMethod,
+      "is_delivery": _isDelivery,
       "expectedDelivery": _expectedDelivery,
-      "orderSource": _orderSource,
+      "order_source": _orderSource,
       "extraCost": _extraCost,
       "items": _items.map((item) => item.toJson()).toList(),
     };

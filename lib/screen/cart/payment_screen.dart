@@ -145,7 +145,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 decoration: InputDecoration(
                   enabledBorder: InputBorder.none,
                   focusedBorder: InputBorder.none,
-                  labelText: '0,00',
+                  hintText: '0,00',
                   labelStyle: TextStyle(
                     color: Color(0xB23C3C43),
                     fontSize: 15,

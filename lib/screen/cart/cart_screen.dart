@@ -502,7 +502,7 @@ class _CartScreenState extends State<CartScreen> {
                                     return DropdownMenuItem<String>(
                                       value: type,
                                       child: Text(
-                                        "(${type})",
+                                        "(${type == '%' ? '%' : 'VND'})",
                                         style: TextStyle(fontSize: 14, color: Color(0xFF338BFF)),
                                       ),
                                     );

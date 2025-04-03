@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mobile/screen/product/product_screen.dart';
 
 import 'package:mobile/service/api_service.dart';
 
@@ -184,7 +185,11 @@ class _InvoiceInfoScreenState extends State<InvoiceInfoScreen> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               ElevatedButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed:
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ProductScreen()),
+                    ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF338BFF),
                   foregroundColor: Colors.white,

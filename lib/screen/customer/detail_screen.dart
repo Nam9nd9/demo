@@ -45,7 +45,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   void initState() {
     super.initState();
     _fetchProvinces();
-    
+
     _nameController = TextEditingController();
     _dobController = TextEditingController();
     _debtController = TextEditingController();
@@ -101,7 +101,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       setState(() {
         _nameController.text = customerData["full_name"] ?? "";
         _dobController.text = customerData["date_of_birth"] ?? "";
-        _debtController.text = customerData["debt"]?.toString() ?? "0"; 
+        _debtController.text = customerData["debt"]?.toString() ?? "0";
         _phoneController.text = customerData["phone"] ?? "";
         _emailController.text = customerData["email"] ?? "";
         _addressController.text = customerData["address"] ?? "";
@@ -110,11 +110,11 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
         _districtController.text = customerData["district_name"] ?? "";
         _wardController.text = customerData["ward_name"] ?? "";
         if (!_customerGroups.contains(_customerGroup)) {
-        _customerGroup = "Khách Trắng";
-        if (!_customerGroups.contains("Khách Trắng")) {
-          _customerGroups.add("Khách Trắng");
+          _customerGroup = "Khách Trắng";
+          if (!_customerGroups.contains("Khách Trắng")) {
+            _customerGroups.add("Khách Trắng");
+          }
         }
-      }
 
         _isLoading = false;
       });
@@ -126,39 +126,39 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
     }
   }
 
-Future<void> _saveCustomerDetails() async {
-  setState(() {
-    _isLoading = true;
-  });
+  Future<void> _saveCustomerDetails() async {
+    setState(() {
+      _isLoading = true;
+    });
 
-  final Map<String, dynamic> customerData = {
-    "full_name": _nameController.text.trim(),
-    "date_of_birth": _dobController.text,
-    "phone": _phoneController.text,
-    "email": _emailController.text,
-    "address": _addressController.text,
-    "province": _provinceController.text,
-    "district_name": _districtController.text,
-    "ward_name": _wardController.text,
-    "group_name": _customerGroup,
-  };
+    final Map<String, dynamic> customerData = {
+      "full_name": _nameController.text.trim(),
+      "date_of_birth": _dobController.text,
+      "phone": _phoneController.text,
+      "email": _emailController.text,
+      "address": _addressController.text,
+      "province": _provinceController.text,
+      "district_name": _districtController.text,
+      "ward_name": _wardController.text,
+      "group_name": _customerGroup,
+    };
 
-  bool success = await ApiService.updateCustomer(widget.customerId, customerData);
+    bool success = await ApiService.updateCustomer(widget.customerId, customerData);
 
-  if (success) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("✅ Lưu thông tin thành công")),
-    );
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("❌ Lưu thất bại! Vui lòng thử lại.")),
-    );
+    if (success) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("✅ Lưu thông tin thành công")));
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("❌ Lưu thất bại! Vui lòng thử lại.")));
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
   }
-
-  setState(() {
-    _isLoading = false;
-  });
-}
 
   @override
   void dispose() {
@@ -186,72 +186,86 @@ Future<void> _saveCustomerDetails() async {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _hasError
+              child:
+                  _isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : _hasError
                       ? const Center(child: Text("❌ Lỗi khi tải dữ liệu"))
                       : SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildSectionTitle("Thông tin cá nhân"),
-                              _buildEditableTextField("Tên khách hàng", _nameController),
-                              _buildEditableTextField("Ngày sinh", _dobController,isDate: true),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildSectionTitle("Thông tin cá nhân"),
+                            _buildEditableTextField("Tên khách hàng", _nameController),
+                            _buildEditableTextField("Ngày sinh", _dobController, isDate: true),
 
-                              _buildSectionTitle("Thông tin quản lý"),
-                              _buildDropdownField("Nhóm khách hàng", _customerGroups, _customerGroup, (newValue) {
+                            _buildSectionTitle("Thông tin quản lý"),
+                            _buildDropdownField(
+                              "Nhóm khách hàng",
+                              _customerGroups,
+                              _customerGroup,
+                              (newValue) {
                                 setState(() {
                                   _customerGroup = newValue!;
                                 });
-                              }),
-                              _buildEditableTextField("Công nợ", _debtController),
+                              },
+                            ),
+                            _buildEditableTextField("Công nợ", _debtController),
 
-                              _buildSectionTitle("Thông tin liên hệ"),
-                              _buildEditableTextField("Số điện thoại", _phoneController),
-                              _buildEditableTextField("Email", _emailController),
-                              _buildSearchableField(
-                                "Tỉnh/Thành phố",
-                                _provinceController,
-                                _provinces.map((p) => p['ProvinceName'].toString()).toList(),
-                                (value) {
-                                  setState(() {
-                                    _selectedProvince = value;
-                                    _selectedDistrict = null;
-                                    _selectedWard = null;
-                                    _districtController.clear();
-                                    _wardController.clear();
-                                  });
-                                  _fetchDistricts(_provinces.firstWhere((p) => p['ProvinceName'] == value)['ProvinceID'].toString());
-                                },
-                              ),
-                              _buildSearchableField(
-                                "Quận/Huyện",
-                                _districtController,
-                                _districts.map((d) => d['DistrictName'].toString()).toList(),
-                                (value) {
-                                  setState(() {
-                                    _selectedDistrict = value;
-                                    _selectedWard = null;
-                                    _wardController.clear();
-                                  });
-                                  _fetchWards(_districts.firstWhere((d) => d['DistrictName'] == value)['DistrictID'].toString());
-                                },
-                              ),
-                              _buildSearchableField(
-                                "Phường/Xã",
-                                _wardController,
-                                _wards.map((w) => w['WardName'].toString()).toList(),
-                                (value) {
-                                  setState(() {
-                                    _selectedWard = value;
-                                  });
-                                },
-                              ),
-                              _buildEditableTextField("Địa chỉ", _addressController),
-                              const SizedBox(height: 20),
-                            ],
-                          ),
+                            _buildSectionTitle("Thông tin liên hệ"),
+                            _buildEditableTextField("Số điện thoại", _phoneController),
+                            _buildEditableTextField("Email", _emailController),
+                            _buildSearchableField(
+                              "Tỉnh/Thành phố",
+                              _provinceController,
+                              _provinces.map((p) => p['ProvinceName'].toString()).toList(),
+                              (value) {
+                                setState(() {
+                                  _selectedProvince = value;
+                                  _selectedDistrict = null;
+                                  _selectedWard = null;
+                                  _districtController.clear();
+                                  _wardController.clear();
+                                });
+                                _fetchDistricts(
+                                  _provinces
+                                      .firstWhere((p) => p['ProvinceName'] == value)['ProvinceID']
+                                      .toString(),
+                                );
+                              },
+                            ),
+                            _buildSearchableField(
+                              "Quận/Huyện",
+                              _districtController,
+                              _districts.map((d) => d['DistrictName'].toString()).toList(),
+                              (value) {
+                                setState(() {
+                                  _selectedDistrict = value;
+                                  _selectedWard = null;
+                                  _wardController.clear();
+                                });
+                                _fetchWards(
+                                  _districts
+                                      .firstWhere((d) => d['DistrictName'] == value)['DistrictID']
+                                      .toString(),
+                                );
+                              },
+                            ),
+                            _buildSearchableField(
+                              "Phường/Xã",
+                              _wardController,
+                              _wards.map((w) => w['WardName'].toString()).toList(),
+                              (value) {
+                                setState(() {
+                                  _selectedWard = value;
+                                });
+                              },
+                            ),
+                            _buildEditableTextField("Địa chỉ", _addressController),
+                            const SizedBox(height: 20),
+                          ],
                         ),
+                      ),
             ),
           ),
         ],
@@ -277,7 +291,7 @@ Future<void> _saveCustomerDetails() async {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               minimumSize: Size(0, 0),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             child: const Padding(
               padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -296,7 +310,12 @@ Future<void> _saveCustomerDetails() async {
     );
   }
 
-  Widget _buildEditableTextField(String label, TextEditingController controller,{bool isNumber = false, bool isDate = false}) {
+  Widget _buildEditableTextField(
+    String label,
+    TextEditingController controller, {
+    bool isNumber = false,
+    bool isDate = false,
+  }) {
     return Column(
       children: [
         const SizedBox(height: 8),
@@ -304,33 +323,41 @@ Future<void> _saveCustomerDetails() async {
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Row(
             children: [
-              SizedBox(width: 160, child: Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w400))),
+              SizedBox(
+                width: 160,
+                child: Text(
+                  label,
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
+                ),
+              ),
               Expanded(
                 child: TextFormField(
                   controller: controller,
                   keyboardType: isNumber ? TextInputType.number : TextInputType.text,
                   readOnly: isDate,
-                  onTap: isDate
-                      ? () {
-                          picker.DatePicker.showDatePicker(
-                            context,
-                            showTitleActions: true,
-                            minTime: DateTime(1900, 1, 1),
-                            maxTime: DateTime.now(),
-                            onConfirm: (date) {
-                              controller.text = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-
-                            },
-                            currentTime: DateTime.now(),
-                            locale: picker.LocaleType.vi,
-                          );
-                        }
-                      : null,
+                  onTap:
+                      isDate
+                          ? () {
+                            picker.DatePicker.showDatePicker(
+                              context,
+                              showTitleActions: true,
+                              minTime: DateTime(1900, 1, 1),
+                              maxTime: DateTime.now(),
+                              onConfirm: (date) {
+                                controller.text =
+                                    "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+                              },
+                              currentTime: DateTime.now(),
+                              locale: picker.LocaleType.vi,
+                            );
+                          }
+                          : null,
                   decoration: InputDecoration(
                     hintStyle: const TextStyle(color: Colors.grey),
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
-                    suffixIcon: isDate ? const Icon(Icons.calendar_today, color: Colors.grey) : null,
+                    suffixIcon:
+                        isDate ? const Icon(Icons.calendar_today, color: Colors.grey) : null,
                   ),
                   validator: (value) => value!.isEmpty ? "Vui lòng nhập $label" : null,
                 ),
@@ -342,97 +369,107 @@ Future<void> _saveCustomerDetails() async {
       ],
     );
   }
-  Widget _buildDropdownField(String label, List<String> items, String selectedValue, Function(String?) onChanged) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 160,
-              child: Text(
-                label,
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
-              ),
-            ),
-            Expanded(
-              child: DropdownButtonFormField<String>(
-                value: selectedValue,
-                decoration: InputDecoration(
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+
+  Widget _buildDropdownField(
+    String label,
+    List<String> items,
+    String selectedValue,
+    Function(String?) onChanged,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 160,
+                child: Text(
+                  label,
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
                 ),
-                items: items.map((String item) {
-                  return DropdownMenuItem<String>(
-                    value: item,
-                    child: Text(item),
-                  );
-                }).toList(),
-                onChanged: onChanged,
-                dropdownColor: Colors.white, 
               ),
-            )
-          ],
-        ),
-      ),
-    ],
-  );
-}  
-  Widget _buildSearchableField(String label, TextEditingController controller, List<String> items, Function(String) onSelected) {
-  return Column(
-    children: [
-      const SizedBox(height: 8),
-      Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 160,
-              child: Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w400)),
-            ),
-            Expanded(
-              child: DropdownSearch<String>(
-                items: items,
-                onChanged: (value) {
-                  if (value != null) {
-                    controller.text = value;
-                    onSelected(value);
-                  }
-                },
-                selectedItem: controller.text.isNotEmpty ? controller.text : null,
-                dropdownDecoratorProps: DropDownDecoratorProps(
-                  dropdownSearchDecoration: InputDecoration(
-                    hintText: "Yêu cầu",
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: selectedValue,
+                  decoration: InputDecoration(
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
                   ),
+                  items:
+                      items.map((String item) {
+                        return DropdownMenuItem<String>(value: item, child: Text(item));
+                      }).toList(),
+                  onChanged: onChanged,
+                  dropdownColor: Colors.white,
                 ),
-                popupProps: PopupProps.menu(
-                  showSearchBox: true,
-                  containerBuilder: (context, popupWidget) {
-                    return Container(
-                      color: Colors.white, 
-                      child: popupWidget,
-                    );
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSearchableField(
+    String label,
+    TextEditingController controller,
+    List<String> items,
+    Function(String) onSelected,
+  ) {
+    return Column(
+      children: [
+        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 160,
+                child: Text(
+                  label,
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
+                ),
+              ),
+              Expanded(
+                child: DropdownSearch<String>(
+                  items: items,
+                  onChanged: (value) {
+                    if (value != null) {
+                      controller.text = value;
+                      onSelected(value);
+                    }
                   },
-                  searchFieldProps: TextFieldProps(
-                    decoration: InputDecoration(
-                      hintText: "Tìm kiếm...",
+                  selectedItem: controller.text.isNotEmpty ? controller.text : null,
+                  dropdownDecoratorProps: DropDownDecoratorProps(
+                    dropdownSearchDecoration: InputDecoration(
+                      hintText: "Yêu cầu",
                       enabledBorder: InputBorder.none,
                       focusedBorder: InputBorder.none,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+                    ),
+                  ),
+                  popupProps: PopupProps.menu(
+                    showSearchBox: true,
+                    containerBuilder: (context, popupWidget) {
+                      return Container(color: Colors.white, child: popupWidget);
+                    },
+                    searchFieldProps: TextFieldProps(
+                      decoration: InputDecoration(
+                        hintText: "Tìm kiếm...",
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+                      ),
                     ),
                   ),
                 ),
               ),
-            )
-          ],
+            ],
+          ),
         ),
-      ),
-    ],
-  );
-}
+      ],
+    );
+  }
 }

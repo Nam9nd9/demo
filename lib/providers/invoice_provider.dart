@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mobile/model/cart_item.dart';
 
 class InvoiceProvider with ChangeNotifier {
-  Map<String, dynamic>? _customer;
+  // Map<String, dynamic>? _customer;
+   String _customer = "";
   String _selectedWarehouse = "Thợ Nhuộm";
   double _discount = 0;
   String _userId = "NV1";
@@ -15,7 +16,7 @@ class InvoiceProvider with ChangeNotifier {
   String _expectedDelivery = "";
   List<Item> _items = [];
 
-  Map<String, dynamic>? get selectedCustomer => _customer;
+  String get selectedCustomer => _customer;
   String get selectedWarehouse => _selectedWarehouse;
   double get discount => _discount;
   String get userId => _userId;
@@ -30,7 +31,7 @@ class InvoiceProvider with ChangeNotifier {
 
   // Setters
   void updateInvoice(Map<String, dynamic> data) {
-    _customer = data["customer"];
+    _customer = data["customer_id"];
     _userId = data["user_id"] ?? "NV1"; // default "NV1" if null
     _selectedWarehouse = data["branch"] ?? "Thợ Nhuộm"; // default "Thợ Nhuộm" if null
     _discount = (data["discount"] ?? 0).toDouble();
@@ -49,7 +50,7 @@ class InvoiceProvider with ChangeNotifier {
   }
 
   void clearInvoice() {
-    _customer = null;
+    _customer = "";
     _selectedWarehouse = "Thợ Nhuộm";
     _discount = 0;
     _discountType = "%";
@@ -75,7 +76,7 @@ class InvoiceProvider with ChangeNotifier {
 
   Map<String, dynamic> toJson() {
     return {
-      "customer": _customer, 
+      "customer_id": _customer, 
       "user_id": _userId,
       "branch": _selectedWarehouse,
       "discount": _discount,

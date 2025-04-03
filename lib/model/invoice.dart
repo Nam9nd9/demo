@@ -58,7 +58,7 @@ class Invoice {
       'customerPaid': customerPaid,
       'customerDeposit': customerDeposit,
       'depositMethod': depositMethod,
-      'customer': customer_id,
+      'customer_id': customer_id,
       'branch': branch,
       'isDelivery': isDelivery,
       'orderSource': orderSource,

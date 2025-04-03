@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/screen/cart/invoiceInfo_screen.dart';
 import 'package:mobile/service/api_service.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile/providers/cart_provider.dart'; // Import đúng đường dẫn của CartProvider
@@ -12,20 +13,40 @@ class PaymentScreen extends StatefulWidget {
 class _PaymentScreenState extends State<PaymentScreen> {
   String depositMethod = '';
   TextEditingController _depositController = TextEditingController();
-  Future<void> processPayment(BuildContext context, InvoiceProvider invoiceProvider, TextEditingController depositController) async {
-  double deposit = double.tryParse(depositController.text) ?? 0;
-  invoiceProvider.updateDepositMethod('cash');
-  invoiceProvider.updateDeposit(deposit);
-  try {
-    final response = await ApiService.createInvoice(invoiceProvider.toJson());
-    if (response != null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Tạo hóa đơn thành công!")));
-    }
-  } catch (e) {
-    print("Lỗi khi gọi API: $e");
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Lỗi khi tạo hóa đơn")));
+
+  Future<void> processPayment(
+    BuildContext context,
+    InvoiceProvider invoiceProvider,
+    TextEditingController depositController,
+  ) async {
+    double deposit = double.tryParse(depositController.text) ?? 0;
+    invoiceProvider.updateDepositMethod('cash');
+    invoiceProvider.updateDeposit(deposit);
+
+    // try {
+    //   final response = await ApiService.createInvoice(invoiceProvider.toJson());
+    //   if (response != null && response['id'] != null) {
+    //     String invoiceId = response['id'].toString();
+    //     print("thông tin đơn hàng id : ${invoiceId}");
+    //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Tạo hóa đơn thành công!")));
+
+    //     await Future.delayed(Duration(seconds: 2));
+    //     Navigator.push(
+    //       context,
+    //       MaterialPageRoute(
+    //         builder: (context) => InvoiceInfoScreen(invoiceId: invoiceId),
+    //       ),
+    //     );
+    //   }
+    // } catch (e) {
+    //   print("Lỗi khi gọi API: $e");
+    //   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Lỗi khi tạo hóa đơn")));
+    // }
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => InvoiceInfoScreen(invoiceId: "DH49")),
+    );
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -37,15 +58,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
         children: [
           SizedBox(height: statusBarHeight),
           _buildHeader(context),
-          Container(
-            height: 16,
-            color: Color(0xFFF2F2F7),
-          ),
+          Container(height: 16, color: Color(0xFFF2F2F7)),
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: depositMethod == 'cash'
-                ? _buildCashPayment(invoiceProvider)
-                : depositMethod == 'bank'
+            child:
+                depositMethod == 'cash'
+                    ? _buildCashPayment(invoiceProvider)
+                    : depositMethod == 'bank'
                     ? _buildBankPayment()
                     : _buildPaymentOptions(),
           ),
@@ -90,16 +109,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Chuyển Khoản:',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-        ),
+        Text('Chuyển Khoản:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
         SizedBox(height: 10),
         Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Center(
-            child: Image.asset('assets/images/splash.png'),
-          ),
+          child: Center(child: Image.asset('assets/images/splash.png')),
         ),
         SizedBox(height: 20),
         ElevatedButton(
@@ -117,58 +131,53 @@ class _PaymentScreenState extends State<PaymentScreen> {
     );
   }
 
-Widget _buildCashPayment(InvoiceProvider invoiceProvider) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        'Tiền Mặt:',
-        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-      ),
-      SizedBox(height: 10),
-      Row(
-        children: [
-          Text(
-            'Tiền nhận thực :',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
-          ),
-          SizedBox(width: 10),
-          Expanded(
-            child: TextField(
-              controller: _depositController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                labelText: '0,00',
-                labelStyle: TextStyle(
-                  color: Color(0xB23C3C43),
-                  fontSize: 15,
-                  fontWeight: FontWeight.w400,
+  Widget _buildCashPayment(InvoiceProvider invoiceProvider) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Tiền Mặt:', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+        SizedBox(height: 10),
+        Row(
+          children: [
+            Text('Tiền nhận thực :', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400)),
+            SizedBox(width: 10),
+            Expanded(
+              child: TextField(
+                controller: _depositController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  labelText: '0,00',
+                  labelStyle: TextStyle(
+                    color: Color(0xB23C3C43),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  border: OutlineInputBorder(),
                 ),
-                border: OutlineInputBorder(),
+                onChanged: (value) {},
               ),
-              onChanged: (value) {},
             ),
+          ],
+        ),
+        SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: () {
+            processPayment(context, invoiceProvider, _depositController);
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue,
+            padding: EdgeInsets.symmetric(vertical: 12),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
-        ],
-      ),
-      SizedBox(height: 20),
-      ElevatedButton(
-        onPressed: () {processPayment(context, invoiceProvider, _depositController);},
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue,
-          padding: EdgeInsets.symmetric(vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          child: Center(
+            child: Text("Xác nhận", style: TextStyle(fontSize: 18, color: Colors.white)),
+          ),
         ),
-        child: Center(
-          child: Text("Xác nhận", style: TextStyle(fontSize: 18, color: Colors.white)),
-        ),
-      ),
-    ],
-  );
-}
-
+      ],
+    );
+  }
 
   Widget _buildHeader(BuildContext context) {
     final cartProvider = Provider.of<CartProvider>(context);
@@ -195,11 +204,17 @@ Widget _buildCashPayment(InvoiceProvider invoiceProvider) {
                     minimumSize: Size(0, 0),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  child: const Text("Thanh toán sau", style: TextStyle(color: Colors.white, fontSize: 16)),
+                  child: const Text(
+                    "Thanh toán sau",
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
                 ),
             ],
           ),
-          Text("${cartProvider.totalPrice()}", style: TextStyle(fontSize: 20, color: Colors.black, fontWeight: FontWeight.w700)),
+          Text(
+            "${cartProvider.totalPrice()}",
+            style: TextStyle(fontSize: 20, color: Colors.black, fontWeight: FontWeight.w700),
+          ),
           SizedBox(height: 20),
         ],
       ),
@@ -213,9 +228,7 @@ void main() {
       create: (context) => CartProvider(),
       child: ChangeNotifierProvider(
         create: (context) => InvoiceProvider(),
-        child: MaterialApp(
-          home: PaymentScreen(),
-        ),
+        child: MaterialApp(home: PaymentScreen()),
       ),
     ),
   );

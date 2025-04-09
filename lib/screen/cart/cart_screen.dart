@@ -9,6 +9,7 @@ import 'package:mobile/screen/home_screen.dart';
 import 'package:mobile/screen/product/product_screen.dart';
 import 'package:mobile/service/api_service.dart';
 import 'package:mobile/widget/create_custumer.dart';
+import 'package:mobile/widget/customDropdown.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -128,40 +129,49 @@ class _CartScreenState extends State<CartScreen> {
                       MaterialPageRoute(builder: (context) => HomeScreen()),
                     ),
               ),
-              Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFF338BFF),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    isDense: true,
-                    value: selectedWarehouse,
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        selectedWarehouse = newValue!;
-                      });
-                    },
-                    items:
-                        warehouseList.map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(
-                              "Kho ${value}",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                    dropdownColor: Color(0xFF338BFF),
-                    icon: Icon(Icons.arrow_drop_down, color: Colors.white),
-                    style: TextStyle(color: Colors.white, fontSize: 16),
-                  ),
-                ),
+              // Container(
+              //   decoration: BoxDecoration(
+              //     color: Color(0xFF338BFF),
+              //     borderRadius: BorderRadius.circular(8),
+              //   ),
+              //   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              //   child: DropdownButtonHideUnderline(
+              //     child: DropdownButton<String>(
+              //       isDense: true,
+              //       value: selectedWarehouse,
+              //       onChanged: (String? newValue) {
+              //         setState(() {
+              //           selectedWarehouse = newValue!;
+              //         });
+              //       },
+              //       items:
+              //           warehouseList.map<DropdownMenuItem<String>>((String value) {
+              //             return DropdownMenuItem<String>(
+              //               value: value,
+              //               child: Text(
+              //                 "Kho ${value}",
+              //                 style: TextStyle(
+              //                   color: Colors.white,
+              //                   fontSize: 15,
+              //                   fontWeight: FontWeight.w500,
+              //                 ),
+              //               ),
+              //             );
+              //           }).toList(),
+              //       dropdownColor: Color(0xFF338BFF),
+              //       icon: Icon(Icons.arrow_drop_down, color: Colors.white),
+              //       style: TextStyle(color: Colors.white, fontSize: 16),
+              //     ),
+              //   ),
+              // ),
+              CustomDropdown(
+                selected: selectedWarehouse,
+                options: warehouseList,
+                onSelected: (newValue) {
+                  setState(() {
+                    selectedWarehouse = newValue;
+                  });
+                },
               ),
             ],
           ),
@@ -276,9 +286,9 @@ class _CartScreenState extends State<CartScreen> {
                         title: Row(
                           children: [
                             Text(selectedCustomer?['full_name'] ?? "Không có tên"),
-                            Spacer(), // Đẩy nút X về bên phải
+                            Spacer(),
                             IconButton(
-                              icon: Icon(Icons.close, color: Colors.black), // Nút X
+                              icon: Icon(Icons.close, color: Colors.black),
                               onPressed: clearSelectedCustomer,
                             ),
                           ],

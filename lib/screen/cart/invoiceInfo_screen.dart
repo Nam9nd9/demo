@@ -83,11 +83,11 @@ class _InvoiceInfoScreenState extends State<InvoiceInfoScreen> {
                 SizedBox(height: 5),
                 Container(
                   decoration: BoxDecoration(
-                    border: Border.all(color: Color(0xFFD9D9D9), width: 1), // Border màu #D9D9D9
-                    borderRadius: BorderRadius.circular(8), // Bo góc 8px
-                    color: Colors.white, // Màu nền (nếu cần)
+                    border: Border.all(color: Color(0xFFD9D9D9), width: 1),
+                    borderRadius: BorderRadius.circular(8), 
+                    color: Colors.white, 
                   ),
-                  padding: EdgeInsets.all(8), // Padding bên trong cho đẹp
+                  padding: EdgeInsets.all(8),
                   child: ListTile(
                     title: Text(
                       customer['full_name'] ?? "Không có tên",

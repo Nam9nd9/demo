@@ -7,15 +7,13 @@ import 'screen/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  
   // Cấu hình Status Bar: icon màu đen, nền trong suốt
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark, // Icon màu đen
-      statusBarBrightness: Brightness.dark, // Dành cho iOS
-    ),
-  );
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: Brightness.dark, // Icon màu đen
+    statusBarBrightness: Brightness.dark, // Dành cho iOS
+  ));
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -29,8 +27,7 @@ void main() async {
         ChangeNotifierProvider(create: (context) => CartProvider()),
       ],
       child: MyApp(),
-    ),
-  );
+    ),);
 }
 
 class MyApp extends StatelessWidget {
@@ -55,6 +52,7 @@ class MyApp extends StatelessWidget {
           backgroundColor: Colors.white,
           foregroundColor: Colors.black,
           elevation: 0,
+          
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,

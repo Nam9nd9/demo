@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mobile/providers/cart_provider.dart';
 import 'package:mobile/screen/product/product_screen.dart';
 
 import 'package:mobile/service/api_service.dart';
+import 'package:provider/provider.dart';
 
 class InvoiceInfoScreen extends StatefulWidget {
   final String invoiceId;
@@ -56,9 +58,9 @@ class _InvoiceInfoScreenState extends State<InvoiceInfoScreen> {
     final customer = invoiceData?['customer'] ?? {};
     final totalValue = invoiceData?['total_value'] ?? 0.0;
     final deposit = invoiceData?['deposit'] ?? 0.0;
-    final customerPaid = deposit;
+    final extracost = invoiceData?['extraCost'] ?? 0.0;
     final currentFinalTotal = totalValue;
-    final amountDue = currentFinalTotal - deposit - customerPaid;
+    final amountDue = currentFinalTotal - deposit - extracost;
 
     final createdAt =
         invoiceData?['created_at'] != null
@@ -84,8 +86,8 @@ class _InvoiceInfoScreenState extends State<InvoiceInfoScreen> {
                 Container(
                   decoration: BoxDecoration(
                     border: Border.all(color: Color(0xFFD9D9D9), width: 1),
-                    borderRadius: BorderRadius.circular(8), 
-                    color: Colors.white, 
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.white,
                   ),
                   padding: EdgeInsets.all(8),
                   child: ListTile(
@@ -176,6 +178,7 @@ class _InvoiceInfoScreenState extends State<InvoiceInfoScreen> {
   }
 
   Widget _buildHeader(BuildContext context, double amountDue) {
+    final cartProvider = Provider.of<CartProvider>(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Column(
@@ -186,10 +189,13 @@ class _InvoiceInfoScreenState extends State<InvoiceInfoScreen> {
             children: [
               ElevatedButton(
                 onPressed:
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ProductScreen()),
-                    ),
+                    () => {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ProductScreen()),
+                      ),
+                      cartProvider.clearCart(),
+                    },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF338BFF),
                   foregroundColor: Colors.white,

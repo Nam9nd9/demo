@@ -195,6 +195,60 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>> createCustomer(Map<String, dynamic> payload) async {
+    String? accessToken = await getAccessToken();
+    final uri = Uri.parse("$baseUrl/customers/customers");
+
+    final response = await http.post(
+      uri,
+      headers: {"Content-Type": "application/json", "Authorization": "Bearer $accessToken"},
+      body: json.encode(payload),
+    );
+
+    final data = json.decode(response.body);
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return data;
+    } else {
+      final message = data["detail"] ?? "Tạo khách hàng thất bại.";
+      throw Exception(message);
+    }
+  }
+
+  static Future<Map<String, dynamic>?> getCustomerGroups({
+    int skip = 0,
+    int limit = 10,
+    String? query,
+  }) async {
+    String? accessToken = await getAccessToken();
+    if (accessToken == null) {
+      print("⚠️ Không có accessToken, cần đăng nhập!");
+      return null;
+    }
+
+    String url = "$baseUrl/customers/groups?limit=$limit&skip=$skip";
+    if (query != null && query.isNotEmpty) {
+      url += "&search=${Uri.encodeComponent(query)}";
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {"Content-Type": "application/json", "Authorization": "Bearer $accessToken"},
+      );
+
+      if (response.statusCode == 200) {
+        final String utf8DecodedBody = utf8.decode(response.bodyBytes);
+        return jsonDecode(utf8DecodedBody);
+      } else {
+        print("❌ API lỗi: ${response.statusCode} - ${response.body}");
+        return null;
+      }
+    } catch (e) {
+      print("⚠️ Lỗi kết nối API: $e");
+      return null;
+    }
+  }
+
   static Future<Map<String, dynamic>?> getCustomerById(String customerId) async {
     final String apiUrl = "$baseUrl/customers/customers/${customerId}";
     String? accessToken = await getAccessToken();

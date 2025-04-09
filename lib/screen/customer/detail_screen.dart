@@ -13,11 +13,11 @@ class CustomerDetailScreen extends StatefulWidget {
   State<CustomerDetailScreen> createState() => _CustomerDetailScreenState();
 }
 
-final List<String> _customerGroups = [
-  '1 - Khách Buôn - CTV',
-  '2 - Vip',
-  '4 - Khách buôn',
-  '5 - Khách lẻ',
+final List<Map<String, String>> _customerGroups = [
+  {"id": "1", "name": "Khách Buôn - CTV"},
+  {"id": "2", "name": "Vip"},
+  {"id": "4", "name": "Khách buôn"},
+  {"id": "5", "name": "Khách lẻ"},
 ];
 
 class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
@@ -37,15 +37,17 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   List<Map<String, dynamic>> _provinces = [];
   List<Map<String, dynamic>> _districts = [];
   List<Map<String, dynamic>> _wards = [];
+  List<Map<String, String>> _customerGroups = [];
+  String? _selectedGroupId;
   String? _selectedProvince;
   String? _selectedDistrict;
   String? _selectedWard;
-
+  DateTime? _selectedDate = DateTime.now();
   @override
   void initState() {
     super.initState();
     _fetchProvinces();
-
+    _fetchCustomerGroups();
     _nameController = TextEditingController();
     _dobController = TextEditingController();
     _debtController = TextEditingController();
@@ -89,6 +91,18 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
     }
   }
 
+  _fetchCustomerGroups() async {
+    final response = await ApiService.getCustomerGroups();
+    if (response != null && response["groups"] != null) {
+      setState(() {
+        _customerGroups =
+            (response["groups"] as List)
+                .map((g) => {"id": g["id"].toString(), "name": g["name"].toString()})
+                .toList();
+      });
+    }
+  }
+
   Future<void> _fetchCustomerDetails() async {
     setState(() {
       _isLoading = true;
@@ -96,26 +110,28 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
     });
 
     final customerData = await ApiService.getCustomerById(widget.customerId);
-    print(customerData);
+    final dobStr = customerData?["date_of_birth"];
     if (customerData != null) {
       setState(() {
         _nameController.text = customerData["full_name"] ?? "";
         _dobController.text = customerData["date_of_birth"] ?? "";
-        _debtController.text = customerData["debt"]?.toString() ?? "0";
+        if (dobStr != null && dobStr is String && dobStr.isNotEmpty) {
+          _selectedDate = DateTime.tryParse(dobStr); // ← chuyển chuỗi thành DateTime
+          if (_selectedDate != null) {
+            _dobController.text =
+                "${_selectedDate!.day.toString().padLeft(2, '0')}/"
+                "${_selectedDate!.month.toString().padLeft(2, '0')}/"
+                "${_selectedDate!.year}";
+          }
+        }
         _phoneController.text = customerData["phone"] ?? "";
         _emailController.text = customerData["email"] ?? "";
         _addressController.text = customerData["address"] ?? "";
-        _customerGroup = customerData["group"]?["name"] ?? "N/A";
+        _selectedGroupId = customerData["group"]?["id"]?.toString();
+
         _provinceController.text = customerData["province"] ?? "";
         _districtController.text = customerData["district_name"] ?? "";
         _wardController.text = customerData["ward_name"] ?? "";
-        if (!_customerGroups.contains(_customerGroup)) {
-          _customerGroup = "Khách Trắng";
-          if (!_customerGroups.contains("Khách Trắng")) {
-            _customerGroups.add("Khách Trắng");
-          }
-        }
-
         _isLoading = false;
       });
     } else {
@@ -133,14 +149,14 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
 
     final Map<String, dynamic> customerData = {
       "full_name": _nameController.text.trim(),
-      "date_of_birth": _dobController.text,
+      "date_of_birth": _selectedDate?.toIso8601String().split('T').first,
       "phone": _phoneController.text,
       "email": _emailController.text,
       "address": _addressController.text,
       "province": _provinceController.text,
       "district_name": _districtController.text,
       "ward_name": _wardController.text,
-      "group_name": _customerGroup,
+      "group_id": _selectedGroupId,
     };
 
     bool success = await ApiService.updateCustomer(widget.customerId, customerData);
@@ -200,16 +216,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                             _buildEditableTextField("Ngày sinh", _dobController, isDate: true),
 
                             _buildSectionTitle("Thông tin quản lý"),
-                            _buildDropdownField(
-                              "Nhóm khách hàng",
-                              _customerGroups,
-                              _customerGroup,
-                              (newValue) {
-                                setState(() {
-                                  _customerGroup = newValue!;
-                                });
-                              },
-                            ),
+                            _buildGroupDropdownField(),
                             _buildEditableTextField("Công nợ", _debtController),
 
                             _buildSectionTitle("Thông tin liên hệ"),
@@ -337,19 +344,36 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                   readOnly: isDate,
                   onTap:
                       isDate
-                          ? () {
-                            picker.DatePicker.showDatePicker(
-                              context,
-                              showTitleActions: true,
-                              minTime: DateTime(1900, 1, 1),
-                              maxTime: DateTime.now(),
-                              onConfirm: (date) {
-                                controller.text =
-                                    "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+                          ? () async {
+                            final pickedDate = await showDatePicker(
+                              context: context,
+                              initialDate: _selectedDate ?? DateTime.now(),
+                              firstDate: DateTime(1900),
+                              lastDate: DateTime.now(),
+                              builder: (context, child) {
+                                return Theme(
+                                  data: ThemeData(
+                                    useMaterial3: true, // << QUAN TRỌNG
+                                    colorScheme: ColorScheme.light(
+                                      primary: Color(0xFF338BFF), // màu giống ảnh bạn gửi
+                                      onPrimary: Colors.white,
+                                      onSurface: Colors.black,
+                                    ),
+                                  ),
+                                  child: child!,
+                                );
                               },
-                              currentTime: DateTime.now(),
-                              locale: picker.LocaleType.vi,
                             );
+
+                            if (pickedDate != null) {
+                              setState(() {
+                                _selectedDate = pickedDate;
+                                controller.text =
+                                    "${pickedDate.day.toString().padLeft(2, '0')}/"
+                                    "${pickedDate.month.toString().padLeft(2, '0')}/"
+                                    "${pickedDate.year}";
+                              });
+                            }
                           }
                           : null,
                   decoration: InputDecoration(
@@ -370,44 +394,42 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
     );
   }
 
-  Widget _buildDropdownField(
-    String label,
-    List<String> items,
-    String selectedValue,
-    Function(String?) onChanged,
-  ) {
+  Widget _buildGroupDropdownField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Row(
-            children: [
-              SizedBox(
-                width: 160,
-                child: Text(
-                  label,
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            const SizedBox(
+              width: 160,
+              child: Text("Nhóm khách hàng", style: TextStyle(fontSize: 15)),
+            ),
+            Expanded(
+              child: DropdownButtonFormField<String>(
+                value: _selectedGroupId,
+                decoration: const InputDecoration(
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
                 ),
+                items:
+                    _customerGroups.map((group) {
+                      return DropdownMenuItem<String>(
+                        value: group["id"],
+                        child: Text(group["name"] ?? ""),
+                      );
+                    }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedGroupId = newValue;
+                  });
+                },
+                dropdownColor: Colors.white,
+                isExpanded: true,
               ),
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  value: selectedValue,
-                  decoration: InputDecoration(
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
-                  ),
-                  items:
-                      items.map((String item) {
-                        return DropdownMenuItem<String>(value: item, child: Text(item));
-                      }).toList(),
-                  onChanged: onChanged,
-                  dropdownColor: Colors.white,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ],
     );

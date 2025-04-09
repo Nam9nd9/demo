@@ -4,7 +4,7 @@ import 'package:mobile/screen/customer/detail_screen.dart';
 class CustomerSearchPage extends StatefulWidget {
   final List<Map<String, dynamic>> customers;
 
-  const CustomerSearchPage({Key? key, required this.customers}) : super(key: key);
+  CustomerSearchPage({Key? key, required this.customers}) : super(key: key);
 
   @override
   _CustomerSearchPageState createState() => _CustomerSearchPageState();
@@ -48,9 +48,10 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
   }
 
   Widget _buildCustomerList() {
-    final filteredCustomers = widget.customers
-        .where((c) => c['full_name'].toLowerCase().contains(_query.toLowerCase()))
-        .toList();
+    final filteredCustomers =
+        widget.customers
+            .where((c) => c['full_name'].toLowerCase().contains(_query.toLowerCase()))
+            .toList();
 
     if (filteredCustomers.isEmpty) {
       return const Center(child: Text("Không tìm thấy khách hàng nào"));

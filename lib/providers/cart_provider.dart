@@ -23,12 +23,9 @@ class CartProvider extends ChangeNotifier {
         discount: discount,
       );
     } else {
-      _cartItems.add(Item(
-        productId: productId,
-        quantity: quantity,
-        price: price,
-        discount: discount,
-      ));
+      _cartItems.add(
+        Item(productId: productId, quantity: quantity, price: price, discount: discount),
+      );
     }
 
     notifyListeners();
@@ -51,7 +48,9 @@ class CartProvider extends ChangeNotifier {
       notifyListeners();
       print("📌 Giỏ hàng hiện tại:");
       for (var item in _cartItems) {
-        print("🔹 Sản phẩm: ${item.productId}, Số lượng: ${item.quantity}, Giá: ${item.price}, Giảm giá: ${item.discount}");
+        print(
+          "🔹 Sản phẩm: ${item.productId}, Số lượng: ${item.quantity}, Giá: ${item.price}, Giảm giá: ${item.discount}",
+        );
       }
     }
   }
@@ -87,9 +86,9 @@ class CartProvider extends ChangeNotifier {
   void updateDiscount(double discount, String discountType) {
     _discountType = discountType;
     if (discountType == "%") {
-      _cartDiscount = discount.clamp(0, 100); // Giới hạn 0% - 100%
+      _cartDiscount = discount.clamp(0, 100);
     } else {
-      _cartDiscount = discount.clamp(0, totalPrice()); // Không lớn hơn tổng giá trị đơn hàng
+      _cartDiscount = discount.clamp(0, totalPrice());
     }
     notifyListeners();
   }

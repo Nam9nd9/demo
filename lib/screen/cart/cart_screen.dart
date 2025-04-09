@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/model/cart_item.dart';
+import 'package:mobile/model/customer.dart';
 import 'package:mobile/providers/cart_provider.dart';
 import 'package:mobile/providers/invoice_provider.dart';
 import 'package:mobile/screen/cart/payment_screen.dart';
@@ -127,14 +128,40 @@ class _CartScreenState extends State<CartScreen> {
                       MaterialPageRoute(builder: (context) => HomeScreen()),
                     ),
               ),
-              CustomDropdown(
-                selected: selectedWarehouse,
-                options: warehouseList,
-                onSelected: (newValue) {
-                  setState(() {
-                    selectedWarehouse = newValue;
-                  });
-                },
+              Container(
+                decoration: BoxDecoration(
+                  color: Color(0xFF338BFF),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    isDense: true,
+                    value: selectedWarehouse,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        selectedWarehouse = newValue!;
+                      });
+                    },
+                    items:
+                        warehouseList.map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(
+                              "Kho ${value}",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                    dropdownColor: Color(0xFF338BFF),
+                    icon: Icon(Icons.arrow_drop_down, color: Colors.white),
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ),
               ),
             ],
           ),
@@ -162,6 +189,7 @@ class _CartScreenState extends State<CartScreen> {
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: GestureDetector(
               onTap: () {
+                final formData = CustomerFormData();
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -170,7 +198,15 @@ class _CartScreenState extends State<CartScreen> {
                           body: Column(
                             children: [
                               SizedBox(height: statusBarHeight),
-                              _buildHeader(context),
+                              _buildHeader(
+                                context,
+                                formData,
+                                onCreated: (customer) {
+                                  setState(() {
+                                    selectedCustomer = customer;
+                                  });
+                                },
+                              ),
                               GestureDetector(
                                 onTap: () async {
                                   Map<String, dynamic>? response = await ApiService.getCustomers(
@@ -209,7 +245,7 @@ class _CartScreenState extends State<CartScreen> {
                                   ),
                                 ),
                               ),
-                              const Expanded(child: CreateCustomerBody()),
+                              Expanded(child: CreateCustomerBody(form: formData)),
                             ],
                           ),
                         ),
@@ -560,7 +596,11 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(
+    BuildContext context,
+    CustomerFormData formData, {
+    required Function(Map<String, dynamic> customer) onCreated,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       color: Colors.white,
@@ -575,104 +615,45 @@ class _CartScreenState extends State<CartScreen> {
                 onPressed: () => Navigator.pop(context),
               ),
               TextButton(
-                onPressed: () {
-                  _saveCustomerDetails();
+                onPressed: () async {
+                  if (formData.formKey.currentState!.validate() ?? false) {
+                    final payload = {
+                      "full_name": formData.nameController.text,
+                      "date_of_birth": formData.selectedDate?.toIso8601String().split('T').first,
+                      "debt": formData.debtController.text,
+                      "phone": formData.phoneController.text,
+                      "email": formData.emailController.text,
+                      "address": formData.addressController.text,
+                      "group_id": formData.selectedGroupId,
+                      "province": formData.selectedProvince,
+                      "district": formData.selectedDistrict,
+                      "ward": formData.selectedWard,
+                    };
+                    // print(payload);
+                    try {
+                      final createdCustomer = await ApiService.createCustomer(payload);
+                      print(payload);
+                      onCreated(createdCustomer);
+                      Navigator.pop(context);
+                    } catch (e) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(e.toString())));
+                    }
+                  }
                 },
                 style: TextButton.styleFrom(
                   backgroundColor: const Color(0xFF338BFF),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  minimumSize: Size(0, 0),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 ),
-                child: const Text(
-                  "Tạo khách hàng",
-                  style: TextStyle(color: Colors.white, fontSize: 16),
-                ),
+                child: const Text("Tạo khách hàng", style: TextStyle(color: Colors.white)),
               ),
             ],
           ),
           const SizedBox(height: 8),
           const Text("Tạo Khách Hàng", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         ],
-      ),
-    );
-  }
-}
-
-class CustomDropdown extends StatelessWidget {
-  final String selected;
-  final List<String> options;
-  final Function(String) onSelected;
-
-  const CustomDropdown({
-    Key? key,
-    required this.selected,
-    required this.options,
-    required this.onSelected,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 170,
-      child: Container(
-        margin: EdgeInsets.only(top: 8),
-        decoration: BoxDecoration(
-          color: Color(0xFF338BFF),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: PopupMenuButton<String>(
-          offset: Offset(0, 50),
-          color: Colors.white,
-          elevation: 8,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          onSelected: (value) => onSelected(value),
-          itemBuilder: (context) {
-            return options
-                .where((item) => item != selected)
-                .map((item) => PopupMenuItem<String>(
-                      value: item,
-                      child: SizedBox(
-                        width: 170,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-                          child: Text(
-                            "Kho $item",
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ))
-                .toList();
-          },
-          child: SizedBox(
-            width: 170,
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Kho $selected",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Icon(Icons.arrow_drop_down, color: Colors.white),
-                ],
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }

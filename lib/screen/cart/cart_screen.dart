@@ -127,40 +127,14 @@ class _CartScreenState extends State<CartScreen> {
                       MaterialPageRoute(builder: (context) => HomeScreen()),
                     ),
               ),
-              Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFF338BFF),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    isDense: true,
-                    value: selectedWarehouse,
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        selectedWarehouse = newValue!;
-                      });
-                    },
-                    items:
-                        warehouseList.map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(
-                              "Kho ${value}",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                    dropdownColor: Color(0xFF338BFF),
-                    icon: Icon(Icons.arrow_drop_down, color: Colors.white),
-                    style: TextStyle(color: Colors.white, fontSize: 16),
-                  ),
-                ),
+              CustomDropdown(
+                selected: selectedWarehouse,
+                options: warehouseList,
+                onSelected: (newValue) {
+                  setState(() {
+                    selectedWarehouse = newValue;
+                  });
+                },
               ),
             ],
           ),
@@ -621,6 +595,84 @@ class _CartScreenState extends State<CartScreen> {
           const SizedBox(height: 8),
           const Text("Tạo Khách Hàng", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         ],
+      ),
+    );
+  }
+}
+
+class CustomDropdown extends StatelessWidget {
+  final String selected;
+  final List<String> options;
+  final Function(String) onSelected;
+
+  const CustomDropdown({
+    Key? key,
+    required this.selected,
+    required this.options,
+    required this.onSelected,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 170,
+      child: Container(
+        margin: EdgeInsets.only(top: 8),
+        decoration: BoxDecoration(
+          color: Color(0xFF338BFF),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: PopupMenuButton<String>(
+          offset: Offset(0, 50),
+          color: Colors.white,
+          elevation: 8,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          onSelected: (value) => onSelected(value),
+          itemBuilder: (context) {
+            return options
+                .where((item) => item != selected)
+                .map((item) => PopupMenuItem<String>(
+                      value: item,
+                      child: SizedBox(
+                        width: 170,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                          child: Text(
+                            "Kho $item",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ))
+                .toList();
+          },
+          child: SizedBox(
+            width: 170,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Kho $selected",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Icon(Icons.arrow_drop_down, color: Colors.white),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

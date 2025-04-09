@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart' as picker;
 import 'package:mobile/service/api_service.dart';
 import 'package:dropdown_search/dropdown_search.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class CreateCustomerBody extends StatefulWidget {
   const CreateCustomerBody({Key? key}) : super(key: key);
@@ -33,6 +34,10 @@ class _CreateCustomerBodyState extends State<CreateCustomerBody> {
   final TextEditingController _provinceController = TextEditingController();
   final TextEditingController _districtController = TextEditingController();
   final TextEditingController _wardController = TextEditingController();
+
+  bool _showCalendar = false;
+  DateTime? _selectedDate = DateTime.now();
+  bool _showYearSelector = false;
 
   @override
   void initState() {
@@ -85,7 +90,7 @@ class _CreateCustomerBodyState extends State<CreateCustomerBody> {
               Container(height: 10, color: Color(0xFFF2F2F7)),
               _buildSectionTitle("Thông tin cá nhân"),
               _buildTextField("Tên khách hàng", _nameController),
-              _buildTextField("Ngày sinh", _dobController, isDate: true),
+              _buildInlineBirthDatePicker("Ngày sinh", _dobController),
 
               Container(height: 10, color: Color(0xFFF2F2F7)),
               _buildSectionTitle("Thông tin quản lý"),
@@ -172,21 +177,37 @@ class _CreateCustomerBodyState extends State<CreateCustomerBody> {
                   controller: controller,
                   keyboardType: isNumber ? TextInputType.number : TextInputType.text,
                   readOnly: isDate,
-                  onTap: isDate
-                      ? () {
-                          picker.DatePicker.showDatePicker(
-                            context,
-                            showTitleActions: true,
-                            minTime: DateTime(1900, 1, 1),
-                            maxTime: DateTime.now(),
-                            onConfirm: (date) {
-                              controller.text = "${date.day}/${date.month}/${date.year}";
-                            },
-                            currentTime: DateTime.now(),
-                            locale: picker.LocaleType.vi,
-                          );
-                        }
-                      : null,
+                  onTap: () async {
+                    final pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: _selectedDate ?? DateTime.now(),
+                      firstDate: DateTime(1900),
+                      lastDate: DateTime.now(),
+                      builder: (context, child) {
+                        return Theme(
+                          data: ThemeData(
+                            useMaterial3: true, // << QUAN TRỌNG
+                            colorScheme: ColorScheme.light(
+                              primary: Color(0xFF338BFF),  // màu giống ảnh bạn gửi
+                              onPrimary: Colors.white,
+                              onSurface: Colors.black,
+                            ),
+                          ),
+                          child: child!,
+                        );
+                      },
+                    );
+
+                    if (pickedDate != null) {
+                      setState(() {
+                        _selectedDate = pickedDate;
+                        controller.text =
+                          "${pickedDate.day.toString().padLeft(2, '0')}/"
+                          "${pickedDate.month.toString().padLeft(2, '0')}/"
+                          "${pickedDate.year}";
+                      });
+                    }
+                  },  
                   decoration: InputDecoration(
                     hintText: label == "Email"
                       ? "Không bắt buộc"
@@ -299,6 +320,74 @@ Widget _buildSearchableField(String label, TextEditingController controller, Lis
           ],
         ),
       ),
+    ],
+  );
+}
+Widget _buildInlineBirthDatePicker(String label, TextEditingController controller) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 160,
+              child: Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w400)),
+            ),
+            Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _showCalendar = !_showCalendar;
+                  });
+                },
+                child: AbsorbPointer(
+                  child: TextFormField(
+                    controller: controller,
+                    readOnly: true,
+                    decoration: const InputDecoration(
+                      hintText: "dd/mm/yyyy",
+                      hintStyle: TextStyle(color: Colors.grey),
+                      suffixIcon: Icon(Icons.calendar_today, color: Colors.grey),
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      if (_showCalendar)
+        Theme(
+          data: ThemeData(
+            useMaterial3: true,
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFF338BFF),
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+          ),
+          child: CalendarDatePicker(
+            initialDate: _selectedDate ?? DateTime.now(),
+            firstDate: DateTime(1900),
+            lastDate: DateTime.now(),
+            currentDate: DateTime.now(),
+            onDateChanged: (newDate) {
+              setState(() {
+                _selectedDate = newDate;
+                controller.text =
+                    "${newDate.day.toString().padLeft(2, '0')}/"
+                    "${newDate.month.toString().padLeft(2, '0')}/"
+                    "${newDate.year}";
+                _showCalendar = false;
+              });
+            },
+          ),
+        ),
+      const Divider(height: 0.5, color: Color(0xFF555E5C), thickness: 0.3),
     ],
   );
 }

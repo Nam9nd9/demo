@@ -108,15 +108,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   Widget _buildBankPayment() {
-    final amount = Provider.of<CartProvider>(context, listen: false).totalPrice();
-    final qrData = generateQRData(amount);
+    // final amount = Provider.of<CartProvider>(context, listen: false).totalPrice();
+    // final qrData = generateQRData(amount);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Chuyển Khoản:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
         SizedBox(height: 10),
-        Center(child: QrImageView(data: qrData, version: QrVersions.auto, size: 300.0)),
+        Center(child: Image.asset('assets/images/splash.png', height: 300)),
         SizedBox(height: 20),
         ElevatedButton(
           onPressed: () {
@@ -237,56 +237,58 @@ class _PaymentScreenState extends State<PaymentScreen> {
     );
   }
 
-  String _tlv(String tag, String value) {
-    final len = value.length.toString().padLeft(2, '0');
-    return '$tag$len$value';
-  }
+  // String _tlv(String tag, String value) {
+  //   final len = value.length.toString().padLeft(2, '0');
+  //   return '$tag$len$value';
+  // }
 
-  String _crc16(String input) {
-    int crc = 0xFFFF;
-    for (int i = 0; i < input.length; i++) {
-      crc ^= input.codeUnitAt(i) << 8;
-      for (int j = 0; j < 8; j++) {
-        if ((crc & 0x8000) != 0) {
-          crc = (crc << 1) ^ 0x1021;
-        } else {
-          crc <<= 1;
-        }
-      }
-    }
-    crc &= 0xFFFF;
-    return crc.toRadixString(16).padLeft(4, '0');
-  }
+  // String _crc16(String input) {
+  //   int crc = 0xFFFF;
+  //   for (int i = 0; i < input.length; i++) {
+  //     crc ^= input.codeUnitAt(i) << 8;
+  //     for (int j = 0; j < 8; j++) {
+  //       if ((crc & 0x8000) != 0) {
+  //         crc = (crc << 1) ^ 0x1021;
+  //       } else {
+  //         crc <<= 1;
+  //       }
+  //     }
+  //   }
+  //   crc &= 0xFFFF;
+  //   return crc.toRadixString(16).padLeft(4, '0');
+  // }
 
-  String generateQRData(double amount) {
-    final payloadFormat = _tlv("00", "01");
-    final pointOfInitiationMethod = _tlv("01", "11");
+  // String generateQRData(double amount) {
+  //   final payloadFormat = _tlv("00", "01");
+  //   final pointOfInitiationMethod = _tlv("01", "11");
 
-    final bankCode = "970436";
-    final accNumber = "0123456789";
-    final name = "NGUYEN VAN A";
+  //   final bankCode = "970407";
+  //   final accNumber = "19034362011011";
+  //   final name = "MAI THI THAO";
+  //   final merchantAccountInfo = _tlv(
+  //     "38",
+  //     _tlv("00", "A000000727") +
+  //         _tlv("01", bankCode) +
+  //         _tlv("02", accNumber) +
+  //         _tlv("08", name.toUpperCase()),
+  //   );
 
-    final merchantAccountInfo = _tlv(
-      "38",
-      _tlv("00", "A000000727") + _tlv("01", bankCode) + _tlv("02", accNumber) + _tlv("08", name),
-    );
+  //   final currencyCode = _tlv("53", "704"); // VND
+  //   final transactionAmount = _tlv("54", amount.toStringAsFixed(0));
+  //   final countryCode = _tlv("58", "VN");
 
-    final currencyCode = _tlv("53", "704");
-    final transactionAmount = _tlv("54", amount.toStringAsFixed(0));
-    final countryCode = _tlv("58", "VN");
+  //   final data =
+  //       payloadFormat +
+  //       pointOfInitiationMethod +
+  //       merchantAccountInfo +
+  //       currencyCode +
+  //       transactionAmount +
+  //       countryCode;
 
-    final data =
-        payloadFormat +
-        pointOfInitiationMethod +
-        merchantAccountInfo +
-        currencyCode +
-        transactionAmount +
-        countryCode;
+  //   final crc = _tlv("63", _crc16(data + "6304").toUpperCase());
 
-    final crc = _tlv("63", _crc16(data + "6304").toUpperCase());
-
-    return data + crc;
-  }
+  //   return data + crc;
+  // }
 }
 
 void main() {

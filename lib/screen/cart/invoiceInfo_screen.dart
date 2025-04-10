@@ -215,7 +215,7 @@ class _InvoiceInfoScreenState extends State<InvoiceInfoScreen> {
               children: [
                 TextSpan(text: amountDue < 0 ? "Tiền thừa trả khách: " : "Còn phải trả: "),
                 TextSpan(
-                  text: "${NumberFormat("#,###", "vi_VN").format(-amountDue)}",
+                  text: "${NumberFormat("#,###", "vi_VN").format(amountDue.abs())}",
                   style: TextStyle(color: Colors.red),
                 ),
               ],

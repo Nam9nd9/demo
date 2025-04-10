@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+
 class AdvancedDropdownButton extends StatefulWidget {
-  final Map<String, String> items; // Thay đổi kiểu dữ liệu
+  final Map<String, String> items;
   final String hint;
   final Function(String)? onChanged;
   final bool customStyle;
@@ -29,7 +30,7 @@ class _AdvancedDropdownButtonState extends State<AdvancedDropdownButton> {
       decoration: BoxDecoration(
         color: widget.customStyle ? const Color(0xFFE9F2FF) : Colors.white,
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: widget.customStyle ?  Color(0x26338BFF) : Colors.grey.shade400),
+        border: Border.all(color: widget.customStyle ? Color(0x26338BFF) : Colors.grey.shade400),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
@@ -42,19 +43,20 @@ class _AdvancedDropdownButtonState extends State<AdvancedDropdownButton> {
             ),
           ),
           value: selectedValue,
-          items: widget.items.entries.map((entry) {
-            return DropdownMenuItem<String>(
-              value: entry.key,
-              child: Text(
-                entry.value, 
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
-                  color: widget.customStyle ? const Color(0xFF338BFF) : Colors.black54,
-                ),
-              ),
-            );
-          }).toList(),
+          items:
+              widget.items.entries.map((entry) {
+                return DropdownMenuItem<String>(
+                  value: entry.key,
+                  child: Text(
+                    entry.value,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                      color: widget.customStyle ? const Color(0xFF338BFF) : Colors.black54,
+                    ),
+                  ),
+                );
+              }).toList(),
           onChanged: (value) {
             setState(() {
               selectedValue = value;
@@ -63,7 +65,10 @@ class _AdvancedDropdownButtonState extends State<AdvancedDropdownButton> {
               widget.onChanged!(value);
             }
           },
-          icon: Icon(Icons.arrow_drop_down, color: widget.customStyle ? const Color(0xFF338BFF) : Colors.black54),
+          icon: Icon(
+            Icons.arrow_drop_down,
+            color: widget.customStyle ? const Color(0xFF338BFF) : Colors.black54,
+          ),
           dropdownColor: Colors.white,
           elevation: 4,
           isExpanded: true,

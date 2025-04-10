@@ -116,7 +116,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
         _nameController.text = customerData["full_name"] ?? "";
         _dobController.text = customerData["date_of_birth"] ?? "";
         if (dobStr != null && dobStr is String && dobStr.isNotEmpty) {
-          _selectedDate = DateTime.tryParse(dobStr); // ← chuyển chuỗi thành DateTime
+          _selectedDate = DateTime.tryParse(dobStr);
           if (_selectedDate != null) {
             _dobController.text =
                 "${_selectedDate!.day.toString().padLeft(2, '0')}/"

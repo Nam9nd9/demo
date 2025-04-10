@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile/providers/cart_provider.dart';
+import 'package:mobile/screen/home_screen.dart';
 import 'package:mobile/screen/product/product_screen.dart';
 
 import 'package:mobile/service/api_service.dart';
@@ -192,7 +193,7 @@ class _InvoiceInfoScreenState extends State<InvoiceInfoScreen> {
                     () => {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => ProductScreen()),
+                        MaterialPageRoute(builder: (context) => HomeScreen()),
                       ),
                       cartProvider.clearCart(),
                     },

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:mobile/screen/cart/invoiceInfo_screen.dart';
 import 'package:mobile/service/api_service.dart';
 import 'package:provider/provider.dart';
-import 'package:mobile/providers/cart_provider.dart'; // Import đúng đường dẫn của CartProvider
-import 'package:mobile/providers/invoice_provider.dart'; // Import InvoiceProvider
+import 'package:mobile/providers/cart_provider.dart';
+import 'package:mobile/providers/invoice_provider.dart';
 
 class PaymentScreen extends StatefulWidget {
   @override
@@ -13,6 +14,7 @@ class PaymentScreen extends StatefulWidget {
 class _PaymentScreenState extends State<PaymentScreen> {
   String depositMethod = '';
   TextEditingController _depositController = TextEditingController();
+  bool bankTransferConfirmed = false;
 
   Future<void> processPayment(
     BuildContext context,
@@ -62,7 +64,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 depositMethod == 'cash'
                     ? _buildCashPayment(invoiceProvider)
                     : depositMethod == 'bank'
-                    ? _buildBankPayment()
+                    ? (bankTransferConfirmed
+                        ? _buildBankTransferAsCash(invoiceProvider)
+                        : _buildBankPayment())
                     : _buildPaymentOptions(),
           ),
         ],
@@ -93,6 +97,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
           onTap: () {
             setState(() {
               depositMethod = 'bank';
+              bankTransferConfirmed = false;
             });
           },
           title: Text('Chuyển Khoản', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
@@ -103,18 +108,24 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   Widget _buildBankPayment() {
+    final amount = Provider.of<CartProvider>(context, listen: false).totalPrice();
+    final qrData = generateQRData(amount);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Chuyển Khoản:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
         SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Center(child: Image.asset('assets/images/splash.png')),
-        ),
+        Center(child: QrImageView(data: qrData, version: QrVersions.auto, size: 300.0)),
         SizedBox(height: 20),
         ElevatedButton(
-          onPressed: () {},
+          onPressed: () {
+            final cartAmount = Provider.of<CartProvider>(context, listen: false).totalPrice();
+            _depositController.text = cartAmount.toStringAsFixed(0);
+            setState(() {
+              bankTransferConfirmed = true;
+            });
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.blue,
             padding: EdgeInsets.symmetric(vertical: 12),
@@ -128,11 +139,19 @@ class _PaymentScreenState extends State<PaymentScreen> {
     );
   }
 
+  Widget _buildBankTransferAsCash(InvoiceProvider invoiceProvider) {
+    return _buildCashPayment(invoiceProvider);
+  }
+
   Widget _buildCashPayment(InvoiceProvider invoiceProvider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Tiền Mặt:', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+        Text(
+          depositMethod == 'cash' ? 'Tiền Mặt:' : 'Chuyển Khoản:',
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+        ),
+        SizedBox(height: 10),
         SizedBox(height: 10),
         Row(
           children: [
@@ -216,6 +235,57 @@ class _PaymentScreenState extends State<PaymentScreen> {
         ],
       ),
     );
+  }
+
+  String _tlv(String tag, String value) {
+    final len = value.length.toString().padLeft(2, '0');
+    return '$tag$len$value';
+  }
+
+  String _crc16(String input) {
+    int crc = 0xFFFF;
+    for (int i = 0; i < input.length; i++) {
+      crc ^= input.codeUnitAt(i) << 8;
+      for (int j = 0; j < 8; j++) {
+        if ((crc & 0x8000) != 0) {
+          crc = (crc << 1) ^ 0x1021;
+        } else {
+          crc <<= 1;
+        }
+      }
+    }
+    crc &= 0xFFFF;
+    return crc.toRadixString(16).padLeft(4, '0');
+  }
+
+  String generateQRData(double amount) {
+    final payloadFormat = _tlv("00", "01");
+    final pointOfInitiationMethod = _tlv("01", "11");
+
+    final bankCode = "970436";
+    final accNumber = "0123456789";
+    final name = "NGUYEN VAN A";
+
+    final merchantAccountInfo = _tlv(
+      "38",
+      _tlv("00", "A000000727") + _tlv("01", bankCode) + _tlv("02", accNumber) + _tlv("08", name),
+    );
+
+    final currencyCode = _tlv("53", "704");
+    final transactionAmount = _tlv("54", amount.toStringAsFixed(0));
+    final countryCode = _tlv("58", "VN");
+
+    final data =
+        payloadFormat +
+        pointOfInitiationMethod +
+        merchantAccountInfo +
+        currencyCode +
+        transactionAmount +
+        countryCode;
+
+    final crc = _tlv("63", _crc16(data + "6304").toUpperCase());
+
+    return data + crc;
   }
 }
 

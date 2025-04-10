@@ -31,12 +31,11 @@ class _CustomerScreenState extends State<CustomerScreen> {
   String? _selectedWard;
   List<Map<String, dynamic>> customers = [];
   String selectedGroup = "Tất cả";
-  final Map<String, String> groupList = {
-    "1": "Khách lẻ",
-    "2": "Khách VIP",
-    "3": "Khách buôn - CTV",
-    "4": "Thành Viên",
-  };
+  Set<String> getCustomerGroups() {
+    final groups = customers.map((c) => c['group_name'] ?? 'Không rõ').toSet();
+    return {"Tất cả", ...groups};
+  }
+
   @override
   void initState() {
     super.initState();
@@ -89,7 +88,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
                                         context,
                                         formData,
                                         onCreated: () {
-                                          fetchCustomers(); // ✅ reload lại danh sách
+                                          fetchCustomers();
                                           ScaffoldMessenger.of(context).showSnackBar(
                                             const SnackBar(
                                               content: Text("Tạo khách hàng thành công"),
@@ -125,7 +124,13 @@ class _CustomerScreenState extends State<CustomerScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: AdvancedDropdownButton(
-              items: groupList,
+              items: {
+                "Tất cả": "Tất cả",
+                ...{
+                  for (var c in customers)
+                    if (c['group_name'] != null) c['group_name']: c['group_name'],
+                },
+              },
               hint: "Chọn nhóm khách hàng",
               onChanged: (value) {
                 setState(() {

@@ -199,18 +199,26 @@ class ApiService {
     String? accessToken = await getAccessToken();
     final uri = Uri.parse("$baseUrl/customers/customers");
 
-    final response = await http.post(
-      uri,
-      headers: {"Content-Type": "application/json", "Authorization": "Bearer $accessToken"},
-      body: json.encode(payload),
-    );
+    try {
+      final response = await http.post(
+        uri,
+        headers: {"Content-Type": "application/json", "Authorization": "Bearer $accessToken"},
+        body: json.encode(payload),
+      );
 
-    final data = json.decode(response.body);
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      return data;
-    } else {
-      final message = data["detail"] ?? "Tạo khách hàng thất bại.";
-      throw Exception(message);
+      final String utf8DecodedBody = utf8.decode(response.bodyBytes);
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return jsonDecode(utf8DecodedBody);
+      } else {
+        try {
+          final Map<String, dynamic> errorData = jsonDecode(utf8DecodedBody);
+          throw errorData;
+        } catch (_) {
+          throw {"error": utf8DecodedBody};
+        }
+      }
+    } catch (e) {
+      rethrow;
     }
   }
 
@@ -306,14 +314,15 @@ class ApiService {
   }
 
   //invoice
-  static Future createInvoice(Map<String, dynamic> payload) async {
+  static Future<dynamic> createInvoice(Map<String, dynamic> payload) async {
     final url = Uri.parse('$baseUrl/invoices/invoices');
     String? accessToken = await getAccessToken();
 
     if (accessToken == null) {
       print("⚠️ Không có accessToken, cần đăng nhập!");
-      return false;
+      throw Exception("Chưa đăng nhập");
     }
+
     try {
       final response = await http.post(
         url,
@@ -321,16 +330,20 @@ class ApiService {
         body: jsonEncode(payload),
       );
 
+      final String utf8DecodedBody = utf8.decode(response.bodyBytes);
+
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final String utf8DecodedBody = utf8.decode(response.bodyBytes);
         return jsonDecode(utf8DecodedBody);
       } else {
-        final Map<String, dynamic> errorData = jsonDecode(response.body);
-        String errorMessage = errorData['detail'] ?? "Lỗi không xác định";
-        throw Exception(errorMessage);
+        try {
+          final Map<String, dynamic> errorData = jsonDecode(utf8DecodedBody);
+          throw errorData;
+        } catch (_) {
+          throw {"error": utf8DecodedBody};
+        }
       }
     } catch (e) {
-      throw Exception("Lỗi khi gọi API: $e");
+      rethrow;
     }
   }
 

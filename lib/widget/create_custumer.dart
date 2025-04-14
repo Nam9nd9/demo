@@ -261,7 +261,14 @@ class _CreateCustomerBodyState extends State<CreateCustomerBody> {
                     suffixIcon:
                         isDate ? const Icon(Icons.calendar_today, color: Colors.grey) : null,
                   ),
-                  validator: (value) => value!.isEmpty ? "Vui lòng nhập $label" : null,
+                  validator: (value) {
+                    if (label == "Email" || label == "Địa chỉ") {
+                      return null; // Không cần kiểm tra nếu là email hoặc địa chỉ
+                    }
+                    return value!.isEmpty
+                        ? "Vui lòng nhập $label"
+                        : null; // Kiểm tra các trường còn lại
+                  },
                 ),
               ),
             ],

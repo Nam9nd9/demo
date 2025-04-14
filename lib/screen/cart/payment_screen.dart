@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:mobile/utils/error_messages.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:mobile/screen/cart/invoiceInfo_screen.dart';
 import 'package:mobile/service/api_service.dart';
@@ -24,7 +27,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
     double deposit = double.tryParse(depositController.text) ?? 0;
     invoiceProvider.updateDepositMethod('cash');
     invoiceProvider.updateDeposit(deposit);
-    print(invoiceProvider.toJson());
 
     try {
       final response = await ApiService.createInvoice(invoiceProvider.toJson());
@@ -42,8 +44,24 @@ class _PaymentScreenState extends State<PaymentScreen> {
         );
       }
     } catch (e) {
-      print("Lỗi khi gọi API: $e");
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Lỗi khi tạo hóa đơn")));
+      print(e);
+      String message = "Đã xảy ra lỗi";
+      if (e is Map<String, dynamic> && e["error"] != null) {
+        String errorString = e["error"];
+        final errorCode = jsonDecode(errorString);
+        message = getErrorMessage(errorCode["detail"]);
+      } else if (e is Exception) {
+        // Nếu là exception có chứa chuỗi JSON lỗi
+        try {
+          final errorData = jsonDecode(e.toString());
+          if (errorData is Map && errorData["error"] != null) {
+            String errorCode = errorData["error"];
+            message = getErrorMessage(errorCode);
+          }
+        } catch (_) {}
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
     }
   }
 

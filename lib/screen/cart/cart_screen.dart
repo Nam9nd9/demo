@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:mobile/model/cart_item.dart';
 import 'package:mobile/model/customer.dart';
@@ -8,6 +10,7 @@ import 'package:mobile/screen/customer/search_select.dart';
 import 'package:mobile/screen/home_screen.dart';
 import 'package:mobile/screen/product/product_screen.dart';
 import 'package:mobile/service/api_service.dart';
+import 'package:mobile/utils/error_messages.dart';
 import 'package:mobile/widget/create_custumer.dart';
 import 'package:mobile/widget/customDropdown.dart';
 import 'package:provider/provider.dart';
@@ -646,9 +649,23 @@ class _CartScreenState extends State<CartScreen> {
                       onCreated(createdCustomer);
                       Navigator.pop(context);
                     } catch (e) {
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text(e.toString())));
+                      String message = "Đã xảy ra lỗi";
+                      if (e is Map<String, dynamic> && e["error"] != null) {
+                        String errorString = e["error"];
+                        final errorCode = jsonDecode(errorString);
+                        message = getErrorMessage(errorCode["detail"]);
+                        print("aaaa : ${errorCode["detail"]}");
+                      } else if (e is Exception) {
+                        try {
+                          final errorData = jsonDecode(e.toString());
+                          if (errorData is Map && errorData["error"] != null) {
+                            String errorCode = errorData["error"];
+                            message = getErrorMessage(errorCode);
+                          }
+                        } catch (_) {}
+                      }
+
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
                     }
                   }
                 },

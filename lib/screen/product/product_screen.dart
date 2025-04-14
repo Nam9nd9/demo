@@ -15,7 +15,12 @@ class ProductScreen extends StatefulWidget {
 }
 
 class _ProductScreenState extends State<ProductScreen> {
-  String _selectedStatus = 'Trạng thái';
+  String _selectedStatus = 'all';
+  final Map<String, String> _statusOptions = {
+    'all': 'Tất cả',
+    'cotheban': 'Đang giao dịch',
+    'ngungban': 'Ngưng giao dịch',
+  };
 
   List<Map<String, dynamic>> _products = [];
 
@@ -159,13 +164,13 @@ class _ProductScreenState extends State<ProductScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: AdvancedDropdownButton(
-              items: {"cotheban": "Đang giao dịch", "ngungban": "Ngưng giao dịch"},
+              items: _statusOptions,
               hint:
                   _selectedStatus == 'cotheban'
                       ? 'Đang giao dịch'
                       : _selectedStatus == 'ngungban'
                       ? 'Ngưng giao dịch'
-                      : 'Trạng thái',
+                      : 'Tất cả',
 
               onChanged: (value) {
                 setState(() {

@@ -42,14 +42,24 @@ class _ProductScreenState extends State<ProductScreen> {
 
   Future<void> fetchProducts() async {
     if (isLoading) return;
+
     setState(() {
       isLoading = true;
     });
 
     final response = await ApiService.getProducts(currentPage * pageSize, pageSize);
     if (response != null && response["products"] != null) {
+      List<dynamic> rawProducts = response["products"];
+
+      // Lọc theo dry_stock
+      if (_selectedStatus == 'cotheban') {
+        rawProducts = rawProducts.where((p) => p["dry_stock"] == true).toList();
+      } else if (_selectedStatus == 'ngungban') {
+        rawProducts = rawProducts.where((p) => p["dry_stock"] == false).toList();
+      }
+
       List<Map<String, dynamic>> newProducts =
-          response["products"].map<Map<String, dynamic>>((product) {
+          rawProducts.map<Map<String, dynamic>>((product) {
             return {
               "image":
                   "https://api.mediax.com.vn${product["images"].isNotEmpty ? product["images"][0]["url"] : "/static/default.png"}",
@@ -94,6 +104,7 @@ class _ProductScreenState extends State<ProductScreen> {
         );
       }
     }
+
     setState(() {
       isLoading = false;
     });
@@ -149,17 +160,26 @@ class _ProductScreenState extends State<ProductScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: AdvancedDropdownButton(
               items: {"cotheban": "Đang giao dịch", "ngungban": "Ngưng giao dịch"},
-              hint: _selectedStatus,
+              hint:
+                  _selectedStatus == 'cotheban'
+                      ? 'Đang giao dịch'
+                      : _selectedStatus == 'ngungban'
+                      ? 'Ngưng giao dịch'
+                      : 'Trạng thái',
+
               onChanged: (value) {
                 setState(() {
                   _selectedStatus = value;
+                  _products.clear();
+                  currentPage = 0;
+                  hasMoreData = true;
                 });
+                fetchProducts();
               },
             ),
           ),
           const SizedBox(height: 6),
           Divider(height: 0.5, color: const Color(0xFF555E5C).withOpacity(0.3)),
-
           Expanded(
             child:
                 _products.isEmpty && isLoading
